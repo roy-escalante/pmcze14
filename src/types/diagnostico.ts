@@ -38,22 +38,51 @@ export interface CriterioEvaluacion {
 
 /**
  * Dimensión 1: Aprovechamiento académico y asistencia de los alumnos
+ * ACTUALIZADO: Ahora usa valores numéricos directos en lugar de CriterioEvaluacion
  */
 export interface DimensionAprovechamiento {
   indicadoresAcademicos: {
-    promedioGeneral: CriterioEvaluacion
-    eficienciaTerminal: CriterioEvaluacion
-    indiceReprobacion: CriterioEvaluacion
-    indiceDesercion: CriterioEvaluacion
+    // Promedios por grado (valores numéricos 0.0 - 10.0)
+    promedioGeneral1ro: number
+    promedioGeneral2do: number
+    promedioGeneral3ro: number
+    // Porcentajes (valores numéricos 0 - 100)
+    eficienciaTerminal: number
+    indiceReprobacion: number
+    indiceDesercion: number
   }
-  evaluacionesExternas: {
+  evaluacionesExternas?: {
     planea?: CriterioEvaluacion
     enlace?: CriterioEvaluacion
     otras?: CriterioEvaluacion[]
   }
   asistenciaAlumnos: {
-    promedioAsistencia: CriterioEvaluacion
-    ausentismoCronico: CriterioEvaluacion
+    promedioAsistencia: number  // Porcentaje 0-100
+    controlAusentismo: string   // Descripción de medidas implementadas
+  }
+  // Ejercicios Integradores de Aprendizaje
+  ejerciciosIntegradores?: {
+    documentoPDF?: string  // URL del documento subido
+    areas?: {
+      manejoInformacion?: {
+        noEvidencia: number
+        requiereApoyo: number
+        enProceso: number
+        alcanzado: number
+      }
+      discriminacionInformacion?: {
+        noEvidencia: number
+        requiereApoyo: number
+        enProceso: number
+        alcanzado: number
+      }
+      calculoMental?: {
+        noEvidencia: number
+        requiereApoyo: number
+        enProceso: number
+        alcanzado: number
+      }
+    }
   }
 }
 

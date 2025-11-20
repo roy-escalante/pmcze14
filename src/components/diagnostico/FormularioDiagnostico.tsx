@@ -6,6 +6,7 @@ import { DatosGeneralesDiagnosticoSchema, DimensionAprovechamientoSchema, Dimens
 import { useDiagnostico, useEscuelas } from '../../stores'
 import { EstadoDiagnostico } from '../../types'
 import { SubirEvidenciasEconomico } from '../shared'
+import EjerciciosIntegradores from './EjerciciosIntegradores'
 
 interface FormularioDiagnosticoProps {
   diagnosticoId?: string
@@ -287,20 +288,19 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
         }
         break
       case 2:
-        // Solo validar que al menos una valoración esté seleccionada
+        // Validar que los datos académicos básicos estén capturados
         try {
           const valores = formAprovechamiento.getValues()
-          const tieneAlgunaValoracion = (
-            valores.indicadoresAcademicos?.promedioGeneral?.valoracion ||
-            valores.indicadoresAcademicos?.eficienciaTerminal?.valoracion ||
-            valores.indicadoresAcademicos?.indiceReprobacion?.valoracion ||
-            valores.indicadoresAcademicos?.indiceDesercion?.valoracion ||
-            valores.asistenciaAlumnos?.promedioAsistencia?.valoracion ||
-            valores.asistenciaAlumnos?.ausentismoCronico?.valoracion
+          const tieneDatosBasicos = (
+            (valores.indicadoresAcademicos?.promedioGeneral1ro && valores.indicadoresAcademicos.promedioGeneral1ro > 0) ||
+            (valores.indicadoresAcademicos?.promedioGeneral2do && valores.indicadoresAcademicos.promedioGeneral2do > 0) ||
+            (valores.indicadoresAcademicos?.promedioGeneral3ro && valores.indicadoresAcademicos.promedioGeneral3ro > 0) ||
+            (valores.indicadoresAcademicos?.eficienciaTerminal && valores.indicadoresAcademicos.eficienciaTerminal > 0) ||
+            (valores.asistenciaAlumnos?.promedioAsistencia && valores.asistenciaAlumnos.promedioAsistencia > 0)
           )
-          
-          if (!tieneAlgunaValoracion) {
-            alert('Debe seleccionar al menos una valoración antes de continuar')
+
+          if (!tieneDatosBasicos) {
+            alert('Debe capturar al menos algunos indicadores académicos antes de continuar')
             esValido = false
           } else {
             const guardadoExitoso = await guardarAprovechamiento()
@@ -967,12 +967,13 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
         </div>
       </div>
 
-      {/* EJERCICIOS INTEGRADORES - Placeholder para siguiente tarea */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-700">
-          <strong>Próximamente:</strong> Sección de Ejercicios Integradores de Aprendizaje (EIA)
-        </p>
-      </div>
+      {/* EJERCICIOS INTEGRADORES DE APRENDIZAJE */}
+      <EjerciciosIntegradores
+        register={formAprovechamiento.register}
+        errors={formAprovechamiento.formState.errors}
+        setValue={formAprovechamiento.setValue}
+        watch={formAprovechamiento.watch}
+      />
     </div>
   )
 
