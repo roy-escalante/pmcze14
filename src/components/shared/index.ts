@@ -1,0 +1,11 @@
+// Shared components across modules
+export * from './LoginForm'
+export * from './Dashboard'
+export * from './FormularioEscuela'
+export * from './ListaEscuelas'
+export * from './GestionEscuelas'
+export * from './TestSupabase'
+export * from './FormularioRegistro'
+export * from './GestionUsuarios'
+export * from './SubirEvidencias'
+export * from './SubirEvidenciasEconomico'
