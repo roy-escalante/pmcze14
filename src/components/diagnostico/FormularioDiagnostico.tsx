@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, ChevronRight, Save, AlertCircle, CheckCircle, Clock, FileText, Users, Target, Award } from 'lucide-react'
-import { DatosGeneralesDiagnosticoSchema, DimensionAprovechamientoSchema, DimensionPracticasDocentesSchema, DimensionFormacionDocenteSchema, type DatosGeneralesDiagnosticoFormData, type DimensionAprovechamientoFormData, type DimensionPracticasDocentesFormData, type DimensionFormacionDocenteFormData } from '../../utils/validations'
+import { ChevronLeft, ChevronRight, Save, AlertCircle, CheckCircle, Clock, FileText, Users, Target, Award, Home, Heart, School, BookOpen, GraduationCap } from 'lucide-react'
+import { DatosGeneralesDiagnosticoSchema, DimensionAprovechamientoSchema, FormularioRespuestasSchema, type DatosGeneralesDiagnosticoFormData, type DimensionAprovechamientoFormData, type FormularioRespuestasFormData } from '../../utils/validations'
 import { useDiagnostico, useEscuelas } from '../../stores'
-import { EstadoDiagnostico } from '../../types'
+import { EstadoDiagnostico, FormularioTipo } from '../../types'
 import { SubirEvidenciasEconomico } from '../shared'
 import EjerciciosIntegradores from './EjerciciosIntegradores'
+import FormularioInstrumento from './FormularioInstrumento'
+import { getFormularioConfig } from '../../config/formularios'
 
 interface FormularioDiagnosticoProps {
   diagnosticoId?: string
@@ -22,24 +24,42 @@ const pasos = [
   },
   {
     id: 2,
-    titulo: 'Aprovechamiento Académico',
-    descripcion: 'Rendimiento y asistencia de alumnos',
+    titulo: 'Indicadores Académicos',
+    descripcion: 'Rendimiento, asistencia y EIA',
     icono: Award
   },
   {
     id: 3,
-    titulo: 'Prácticas Docentes',
-    descripcion: 'Métodos y estrategias de enseñanza',
-    icono: Users
+    titulo: 'Ambiente Familiar',
+    descripcion: 'Apoyo familiar al aprendizaje',
+    icono: Home
   },
   {
     id: 4,
-    titulo: 'Formación Docente',
-    descripcion: 'Desarrollo profesional del personal',
-    icono: Target
+    titulo: 'Desarrollo Integral',
+    descripcion: 'Bienestar y motivación estudiantil',
+    icono: Heart
   },
   {
     id: 5,
+    titulo: 'Ambiente de Aprendizaje',
+    descripcion: 'Clima escolar y convivencia',
+    icono: School
+  },
+  {
+    id: 6,
+    titulo: 'Prácticas Docentes',
+    descripcion: 'Métodos y estrategias de enseñanza',
+    icono: BookOpen
+  },
+  {
+    id: 7,
+    titulo: 'Formación Docente',
+    descripcion: 'Desarrollo profesional continuo',
+    icono: GraduationCap
+  },
+  {
+    id: 8,
     titulo: 'Revisión Final',
     descripcion: 'Validación y envío del diagnóstico',
     icono: CheckCircle
@@ -194,50 +214,49 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
     }
   })
 
-  const formPracticasDocentes = useForm<DimensionPracticasDocentesFormData>({
-    resolver: zodResolver(DimensionPracticasDocentesSchema),
+  // Formularios de Google Forms (pasos 3-7)
+  const formAmbienteFamiliar = useForm<FormularioRespuestasFormData>({
+    resolver: zodResolver(FormularioRespuestasSchema),
     defaultValues: {
-      planeacionDidactica: {
-        elaboracionPlanes: { id: 'elaboracion_planes', nombre: 'Elaboración de Planes', descripcion: 'Calidad y pertinencia de los planes de clase elaborados' },
-        adecuacionesNEE: { id: 'adecuaciones_nee', nombre: 'Adecuaciones NEE', descripcion: 'Adaptaciones curriculares para estudiantes con necesidades especiales' },
-        usoProgramasEstudio: { id: 'uso_programas', nombre: 'Uso de Programas de Estudio', descripcion: 'Aplicación efectiva de los programas educativos oficiales' }
-      },
-      ambienteAprendizaje: {
-        climaAula: { id: 'clima_aula', nombre: 'Clima del Aula', descripcion: 'Ambiente favorable para el aprendizaje en el salón de clases' },
-        inclusionDiversidad: { id: 'inclusion_diversidad', nombre: 'Inclusión y Diversidad', descripcion: 'Atención a la diversidad cultural, social y académica' },
-        convivenciaPacifica: { id: 'convivencia_pacifica', nombre: 'Convivencia Pacífica', descripcion: 'Promoción de relaciones armoniosas entre estudiantes' }
-      },
-      evaluacionAprendizaje: {
-        instrumentosEvaluacion: { id: 'instrumentos_evaluacion', nombre: 'Instrumentos de Evaluación', descripcion: 'Variedad y pertinencia de las herramientas de evaluación utilizadas' },
-        retroalimentacion: { id: 'retroalimentacion', nombre: 'Retroalimentación', descripcion: 'Calidad y frecuencia de la retroalimentación proporcionada a los estudiantes' },
-        registroAvances: { id: 'registro_avances', nombre: 'Registro de Avances', descripcion: 'Sistematización del seguimiento del progreso estudiantil' }
-      },
-      liderazgoDirectivo: {
-        gestionPedagogica: { id: 'gestion_pedagogica', nombre: 'Gestión Pedagógica', descripcion: 'Liderazgo académico y orientación pedagógica del equipo directivo' },
-        acompanamiento: { id: 'acompanamiento', nombre: 'Acompañamiento Docente', descripcion: 'Apoyo y supervisión al trabajo docente en el aula' },
-        toma_decisiones: { id: 'toma_decisiones', nombre: 'Toma de Decisiones', descripcion: 'Proceso de toma de decisiones basado en evidencia educativa' }
-      }
+      formularioTipo: FormularioTipo.AMBIENTE_FAMILIAR,
+      respuestas: {},
+      porcentajeCompletitud: 0
     }
   })
 
-  const formFormacionDocente = useForm<DimensionFormacionDocenteFormData>({
-    resolver: zodResolver(DimensionFormacionDocenteSchema),
+  const formDesarrolloIntegral = useForm<FormularioRespuestasFormData>({
+    resolver: zodResolver(FormularioRespuestasSchema),
     defaultValues: {
-      desarrolloProfesional: {
-        participacionCursos: { id: 'participacion_cursos', nombre: 'Participación en Cursos', descripcion: 'Participación en cursos de actualización disciplinar y pedagógica' },
-        aplicacionAprendizajes: { id: 'aplicacion_aprendizajes', nombre: 'Aplicación de Aprendizajes', descripcion: 'Aplicación de conocimientos adquiridos en el aula' },
-        autoformacion: { id: 'autoformacion', nombre: 'Autoformación', descripcion: 'Procesos de autoformación y desarrollo profesional autónomo' }
-      },
-      colaboracionProfesional: {
-        trabajoEnEquipo: { id: 'trabajo_equipo', nombre: 'Trabajo en Equipo', descripcion: 'Colaboración efectiva en equipos de trabajo pedagógico' },
-        intercambioExperiencias: { id: 'intercambio_experiencias', nombre: 'Intercambio de Experiencias', descripcion: 'Participación en espacios de intercambio profesional' },
-        mentoriaDocente: { id: 'mentoria_docente', nombre: 'Mentoría Docente', descripcion: 'Participación en programas de mentoría y acompañamiento' }
-      },
-      innovacionPedagogica: {
-        useTecnologias: { id: 'use_tecnologias', nombre: 'Uso de Tecnologías', descripcion: 'Integración de tecnologías educativas en la práctica docente' },
-        estrategiasInnovadoras: { id: 'estrategias_innovadoras', nombre: 'Estrategias Innovadoras', descripcion: 'Implementación de estrategias pedagógicas innovadoras' },
-        investigacionEducativa: { id: 'investigacion_educativa', nombre: 'Investigación Educativa', descripcion: 'Participación en proyectos de investigación educativa' }
-      }
+      formularioTipo: FormularioTipo.DESARROLLO_INTEGRAL,
+      respuestas: {},
+      porcentajeCompletitud: 0
+    }
+  })
+
+  const formAmbienteAprendizaje = useForm<FormularioRespuestasFormData>({
+    resolver: zodResolver(FormularioRespuestasSchema),
+    defaultValues: {
+      formularioTipo: FormularioTipo.AMBIENTE_APRENDIZAJE,
+      respuestas: {},
+      porcentajeCompletitud: 0
+    }
+  })
+
+  const formPracticasDocentes = useForm<FormularioRespuestasFormData>({
+    resolver: zodResolver(FormularioRespuestasSchema),
+    defaultValues: {
+      formularioTipo: FormularioTipo.PRACTICAS_DOCENTES,
+      respuestas: {},
+      porcentajeCompletitud: 0
+    }
+  })
+
+  const formFormacionDocente = useForm<FormularioRespuestasFormData>({
+    resolver: zodResolver(FormularioRespuestasSchema),
+    defaultValues: {
+      formularioTipo: FormularioTipo.FORMACION_DOCENTE,
+      respuestas: {},
+      porcentajeCompletitud: 0
     }
   })
 
@@ -312,66 +331,15 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
         }
         break
       case 3:
-        // Validación para Prácticas Docentes
-        try {
-          const valores = formPracticasDocentes.getValues()
-          const tieneAlgunaValoracion = (
-            valores.planeacionDidactica?.elaboracionPlanes?.valoracion ||
-            valores.planeacionDidactica?.adecuacionesNEE?.valoracion ||
-            valores.planeacionDidactica?.usoProgramasEstudio?.valoracion ||
-            valores.ambienteAprendizaje?.climaAula?.valoracion ||
-            valores.ambienteAprendizaje?.inclusionDiversidad?.valoracion ||
-            valores.ambienteAprendizaje?.convivenciaPacifica?.valoracion ||
-            valores.evaluacionAprendizaje?.instrumentosEvaluacion?.valoracion ||
-            valores.evaluacionAprendizaje?.retroalimentacion?.valoracion ||
-            valores.evaluacionAprendizaje?.registroAvances?.valoracion ||
-            valores.liderazgoDirectivo?.gestionPedagogica?.valoracion ||
-            valores.liderazgoDirectivo?.acompanamiento?.valoracion ||
-            valores.liderazgoDirectivo?.toma_decisiones?.valoracion
-          )
-          
-          if (!tieneAlgunaValoracion) {
-            alert('Debe seleccionar al menos una valoración antes de continuar')
-            esValido = false
-          } else {
-            const guardadoExitoso = await guardarPracticasDocentes()
-            esValido = guardadoExitoso
-          }
-        } catch (error) {
-          console.error('Error en validación paso 3:', error)
-          esValido = false
-        }
-        break
       case 4:
-        // Validación para Formación Docente
-        try {
-          const valores = formFormacionDocente.getValues()
-          const tieneAlgunaValoracion = (
-            valores.desarrolloProfesional?.participacionCursos?.valoracion ||
-            valores.desarrolloProfesional?.aplicacionAprendizajes?.valoracion ||
-            valores.desarrolloProfesional?.autoformacion?.valoracion ||
-            valores.colaboracionProfesional?.trabajoEnEquipo?.valoracion ||
-            valores.colaboracionProfesional?.intercambioExperiencias?.valoracion ||
-            valores.colaboracionProfesional?.mentoriaDocente?.valoracion ||
-            valores.innovacionPedagogica?.useTecnologias?.valoracion ||
-            valores.innovacionPedagogica?.estrategiasInnovadoras?.valoracion ||
-            valores.innovacionPedagogica?.investigacionEducativa?.valoracion
-          )
-          
-          if (!tieneAlgunaValoracion) {
-            alert('Debe seleccionar al menos una valoración antes de continuar')
-            esValido = false
-          } else {
-            const guardadoExitoso = await guardarFormacionDocente()
-            esValido = guardadoExitoso
-          }
-        } catch (error) {
-          console.error('Error en validación paso 4:', error)
-          esValido = false
-        }
-        break
       case 5:
-        // Último paso - puede enviar
+      case 6:
+      case 7:
+        // Formularios de Google Forms - validación opcional (permiten continuar aunque estén vacíos)
+        esValido = true
+        break
+      case 8:
+        // Último paso - Revisión final
         esValido = true
         break
     }
@@ -979,430 +947,135 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
 
   const renderPaso3 = () => (
     <div className="space-y-6">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-        <h3 className="text-xl font-bold text-green-900 mb-4">Prácticas Docentes</h3>
-        <p className="text-green-700">
-          Evalúe las metodologías, estrategias de enseñanza y prácticas pedagógicas implementadas en la escuela.
-        </p>
-      </div>
-
-      <div className="space-y-8">
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-          Planeación Didáctica
-        </h4>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'planeacionDidactica.elaboracionPlanes',
-            'Elaboración de Planes de Clase',
-            'Calidad y pertinencia de los planes de clase elaborados por los docentes',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'planeacionDidactica.adecuacionesNEE',
-            'Adecuaciones para NEE',
-            'Adaptaciones curriculares para estudiantes con necesidades educativas especiales',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'planeacionDidactica.usoProgramasEstudio',
-            'Uso de Programas de Estudio',
-            'Aplicación efectiva de los programas educativos oficiales vigentes',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-        </div>
-
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
-          Ambiente de Aprendizaje
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'ambienteAprendizaje.climaAula',
-            'Clima del Aula',
-            'Ambiente favorable para el aprendizaje en el salón de clases',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'ambienteAprendizaje.inclusionDiversidad',
-            'Inclusión y Diversidad',
-            'Atención a la diversidad cultural, social y académica de los estudiantes',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'ambienteAprendizaje.convivenciaPacifica',
-            'Convivencia Pacífica',
-            'Promoción de relaciones armoniosas y respetuosas entre estudiantes',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-        </div>
-
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
-          Evaluación del Aprendizaje
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'evaluacionAprendizaje.instrumentosEvaluacion',
-            'Instrumentos de Evaluación',
-            'Variedad y pertinencia de las herramientas de evaluación utilizadas',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'evaluacionAprendizaje.retroalimentacion',
-            'Retroalimentación',
-            'Calidad y frecuencia de la retroalimentación proporcionada a los estudiantes',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'evaluacionAprendizaje.registroAvances',
-            'Registro de Avances',
-            'Sistematización del seguimiento del progreso estudiantil',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-        </div>
-
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
-          Liderazgo Directivo
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'liderazgoDirectivo.gestionPedagogica',
-            'Gestión Pedagógica',
-            'Liderazgo académico y orientación pedagógica del equipo directivo',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'liderazgoDirectivo.acompanamiento',
-            'Acompañamiento Docente',
-            'Apoyo y supervisión al trabajo docente en el aula',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'liderazgoDirectivo.toma_decisiones',
-            'Toma de Decisiones',
-            'Proceso de toma de decisiones basado en evidencia educativa',
-            formPracticasDocentes.register,
-            formPracticasDocentes.formState.errors,
-            formPracticasDocentes.watch,
-            formPracticasDocentes.setValue
-          )}
-        </div>
-      </div>
+      <FormularioInstrumento
+        config={getFormularioConfig(FormularioTipo.AMBIENTE_FAMILIAR)}
+        register={formAmbienteFamiliar.register}
+        errors={formAmbienteFamiliar.formState.errors}
+        setValue={formAmbienteFamiliar.setValue}
+        watch={formAmbienteFamiliar.watch}
+      />
     </div>
   )
 
   const renderPaso4 = () => (
     <div className="space-y-6">
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-        <h3 className="text-xl font-bold text-purple-900 mb-4">Formación Docente</h3>
-        <p className="text-purple-700">
-          Evalúe los programas de desarrollo profesional y capacitación del personal educativo.
-        </p>
-      </div>
-
-      <div className="space-y-8">
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-          Capacitación Continua
-        </h4>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'capacitacionContinua.cursosActualizacion',
-            'Cursos de Actualización Pedagógica',
-            'Participación del personal en cursos de actualización pedagógica',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'capacitacionContinua.talleresTecnologia',
-            'Talleres de Tecnología Educativa',
-            'Capacitación en herramientas y tecnología educativa',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'capacitacionContinua.seminariosGestion',
-            'Seminarios de Gestión Escolar',
-            'Participación en seminarios de gestión y administración escolar',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-        </div>
-
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
-          Programas de Desarrollo
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'programasDesarrollo.especializacionAreas',
-            'Especialización en Áreas Temáticas',
-            'Especialización del personal en áreas temáticas específicas',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'programasDesarrollo.certificacionesProfesionales',
-            'Certificaciones Profesionales',
-            'Obtención de certificaciones profesionales relevantes',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'programasDesarrollo.programasPosgrado',
-            'Programas de Posgrado',
-            'Participación en programas de maestría o doctorado',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-        </div>
-
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
-          Colaboración Profesional
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'colaboracionProfesional.comunidadesAprendizaje',
-            'Comunidades de Aprendizaje',
-            'Participación en comunidades de aprendizaje profesional',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'colaboracionProfesional.intercambioExperiencias',
-            'Intercambio de Experiencias',
-            'Intercambio de experiencias educativas entre docentes',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'colaboracionProfesional.mentoriasDocentes',
-            'Mentorías entre Docentes',
-            'Programas de mentoría y acompañamiento entre docentes',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-        </div>
-
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
-          Evaluación del Desempeño
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'evaluacionDesempeno.observacionesClase',
-            'Observaciones de Clase',
-            'Observaciones estructuradas del desempeño en el aula',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'evaluacionDesempeno.planesMejora',
-            'Planes de Mejora Individual',
-            'Elaboración y seguimiento de planes de mejora individual',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-
-          {renderCriterioEvaluacion(
-            'evaluacionDesempeno.retroalimentacionEstructurada',
-            'Retroalimentación Estructurada',
-            'Retroalimentación estructurada sobre el desempeño docente',
-            formFormacionDocente.register,
-            formFormacionDocente.formState.errors,
-            formFormacionDocente.watch,
-            formFormacionDocente.setValue
-          )}
-        </div>
-      </div>
+      <FormularioInstrumento
+        config={getFormularioConfig(FormularioTipo.DESARROLLO_INTEGRAL)}
+        register={formDesarrolloIntegral.register}
+        errors={formDesarrolloIntegral.formState.errors}
+        setValue={formDesarrolloIntegral.setValue}
+        watch={formDesarrolloIntegral.watch}
+      />
     </div>
   )
 
-  const renderPaso5 = () => {
-    const obtenerResumen = () => {
-      const datosGenerales = formDatosGenerales.getValues()
-      const aprovechamiento = formAprovechamiento.getValues()
-      const practicasDocentes = formPracticasDocentes.getValues()
-      
-      const contarValoraciones = (dimension: any) => {
-        let total = 0
-        let completadas = 0
-        
-        const recorrer = (obj: any) => {
-          for (const key in obj) {
-            if (obj[key] && typeof obj[key] === 'object') {
-              if (obj[key].valoracion) {
-                total++
-                if (obj[key].valoracion > 0) completadas++
-              } else {
-                recorrer(obj[key])
-              }
-            }
-          }
-        }
-        recorrer(dimension)
-        return { total, completadas }
-      }
-      
-      const resumenAprovechamiento = contarValoraciones(aprovechamiento)
-      const resumenPracticas = contarValoraciones(practicasDocentes)
-      const formacionDocente = formFormacionDocente.getValues()
-      const resumenFormacion = contarValoraciones(formacionDocente)
-      
-      return {
-        datosGenerales,
-        resumenAprovechamiento,
-        resumenPracticas,
-        resumenFormacion,
-        totalCriterios: resumenAprovechamiento.total + resumenPracticas.total + resumenFormacion.total,
-        totalCompletados: resumenAprovechamiento.completadas + resumenPracticas.completadas + resumenFormacion.completadas
-      }
+  const renderPaso5 = () => (
+    <div className="space-y-6">
+      <FormularioInstrumento
+        config={getFormularioConfig(FormularioTipo.AMBIENTE_APRENDIZAJE)}
+        register={formAmbienteAprendizaje.register}
+        errors={formAmbienteAprendizaje.formState.errors}
+        setValue={formAmbienteAprendizaje.setValue}
+        watch={formAmbienteAprendizaje.watch}
+      />
+    </div>
+  )
+
+  const renderPaso6 = () => (
+    <div className="space-y-6">
+      <FormularioInstrumento
+        config={getFormularioConfig(FormularioTipo.PRACTICAS_DOCENTES)}
+        register={formPracticasDocentes.register}
+        errors={formPracticasDocentes.formState.errors}
+        setValue={formPracticasDocentes.setValue}
+        watch={formPracticasDocentes.watch}
+      />
+    </div>
+  )
+
+  const renderPaso7 = () => (
+    <div className="space-y-6">
+      <FormularioInstrumento
+        config={getFormularioConfig(FormularioTipo.FORMACION_DOCENTE)}
+        register={formFormacionDocente.register}
+        errors={formFormacionDocente.formState.errors}
+        setValue={formFormacionDocente.setValue}
+        watch={formFormacionDocente.watch}
+      />
+    </div>
+  )
+
+  const renderPaso8 = () => {
+    const obtenerProgreso = () => {
+      const formularios = [
+        { nombre: 'Ambiente Familiar', form: formAmbienteFamiliar },
+        { nombre: 'Desarrollo Integral', form: formDesarrolloIntegral },
+        { nombre: 'Ambiente Aprendizaje', form: formAmbienteAprendizaje },
+        { nombre: 'Prácticas Docentes', form: formPracticasDocentes },
+        { nombre: 'Formación Docente', form: formFormacionDocente }
+      ]
+
+      return formularios.map(({ nombre, form }) => {
+        const valores = form.getValues()
+        const respuestas = valores.respuestas || {}
+        const totalPreguntas = Object.keys(respuestas).length
+        const respondidas = Object.values(respuestas).filter((r: any) =>
+          r.respuestaNumerica !== undefined || r.respuestaTexto
+        ).length
+        const porcentaje = totalPreguntas > 0 ? Math.round((respondidas / totalPreguntas) * 100) : 0
+
+        return { nombre, total: totalPreguntas, respondidas, porcentaje }
+      })
     }
-    
-    const resumen = obtenerResumen()
-    const porcentajeCompletado = resumen.totalCriterios > 0 
-      ? Math.round((resumen.totalCompletados / resumen.totalCriterios) * 100)
-      : 0
-    
+
+    const progresos = obtenerProgreso()
+    const datosGenerales = formDatosGenerales.getValues()
+    const aprovechamiento = formAprovechamiento.getValues()
+
+    const promedioTotal = progresos.reduce((sum, p) => sum + p.porcentaje, 0) / progresos.length
+    const porcentajeCompletado = Math.round(promedioTotal)
+
     return (
       <div className="space-y-6">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-xl font-bold text-blue-900 mb-4">Revisión Final del Diagnóstico</h3>
           <p className="text-blue-700">
-            Revise toda la información capturada antes de enviar el diagnóstico para su validación.
+            Revise el progreso de cada sección antes de enviar el diagnóstico.
           </p>
         </div>
 
-        {/* Resumen de completitud */}
+        {/* Progreso global */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Progreso del Diagnóstico</h4>
-          
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Progreso Global</h4>
           <div className="mb-4">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Criterios evaluados</span>
-              <span>{resumen.totalCompletados} de {resumen.totalCriterios}</span>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-700">Completitud Total</span>
+              <span className="text-sm font-bold text-blue-600">{porcentajeCompletado}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-blue-600 h-3 rounded-full transition-all"
                 style={{ width: `${porcentajeCompletado}%` }}
               ></div>
             </div>
-            <p className="text-center text-sm text-gray-500 mt-2">{porcentajeCompletado}% completado</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h5 className="font-medium text-gray-900 mb-3">🏆 Aprovechamiento Académico</h5>
-              <p className="text-sm text-gray-600">
-                {resumen.resumenAprovechamiento.completadas} de {resumen.resumenAprovechamiento.total} criterios evaluados
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
-                <div 
-                  className="bg-green-500 h-1 rounded-full" 
-                  style={{ width: `${resumen.resumenAprovechamiento.total > 0 ? (resumen.resumenAprovechamiento.completadas / resumen.resumenAprovechamiento.total) * 100 : 0}%` }}
-                ></div>
+          {/* Desglose por formulario */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            {progresos.map((progreso, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                <h5 className="font-medium text-gray-900 mb-2">{progreso.nombre}</h5>
+                <p className="text-sm text-gray-600 mb-2">
+                  {progreso.respondidas} de {progreso.total} preguntas
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    className="bg-green-500 h-1.5 rounded-full"
+                    style={{ width: `${progreso.porcentaje}%` }}
+                  ></div>
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <h5 className="font-medium text-gray-900 mb-3">👥 Prácticas Docentes</h5>
-              <p className="text-sm text-gray-600">
-                {resumen.resumenPracticas.completadas} de {resumen.resumenPracticas.total} criterios evaluados
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
-                <div 
-                  className="bg-purple-500 h-1 rounded-full" 
-                  style={{ width: `${resumen.resumenPracticas.total > 0 ? (resumen.resumenPracticas.completadas / resumen.resumenPracticas.total) * 100 : 0}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            <div>
-              <h5 className="font-medium text-gray-900 mb-3">📚 Formación Docente</h5>
-              <p className="text-sm text-gray-600">
-                {resumen.resumenFormacion.completadas} de {resumen.resumenFormacion.total} criterios evaluados
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
-                <div 
-                  className="bg-blue-500 h-1 rounded-full" 
-                  style={{ width: `${resumen.resumenFormacion.total > 0 ? (resumen.resumenFormacion.completadas / resumen.resumenFormacion.total) * 100 : 0}%` }}
-                ></div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -1412,28 +1085,28 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-700">Escuela:</span>
-              <p className="text-gray-900">{resumen.datosGenerales.nombreEscuela || 'No especificada'}</p>
+              <p className="text-gray-900">{datosGenerales.nombreEscuela || 'No especificada'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">CCT:</span>
-              <p className="text-gray-900">{resumen.datosGenerales.cct || 'No especificado'}</p>
+              <p className="text-gray-900">{datosGenerales.cct || 'No especificado'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Ciclo Escolar:</span>
-              <p className="text-gray-900">{resumen.datosGenerales.cicloEscolar || 'No especificado'}</p>
+              <p className="text-gray-900">{datosGenerales.cicloEscolar || 'No especificado'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Responsable:</span>
-              <p className="text-gray-900">{resumen.datosGenerales.responsable?.nombre || 'No especificado'}</p>
+              <p className="text-gray-900">{datosGenerales.responsable?.nombre || 'No especificado'}</p>
             </div>
           </div>
         </div>
 
-        {/* Advertencias y validaciones */}
-        {porcentajeCompletado < 50 && (
+        {/* Advertencias */}
+        {porcentajeCompletado < 80 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-yellow-800">
-              ⚠️ <strong>Diagnóstico incompleto:</strong> Se recomienda evaluar al menos el 50% de los criterios antes de enviar.
+              ⚠️ <strong>Nota:</strong> Se recomienda completar al menos el 80% de las preguntas para un diagnóstico completo.
             </p>
           </div>
         )}
@@ -1441,82 +1114,69 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
         {/* Acciones */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <button 
+            <button
               type="button"
-              className="flex-1 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
               onClick={async () => {
                 try {
                   if (!diagnosticoActual) {
                     alert('Error: No hay diagnóstico activo')
                     return
                   }
-                  
-                  // Guardar todos los datos
-                  const datosGenerales = formDatosGenerales.getValues()
-                  const aprovechamiento = formAprovechamiento.getValues() 
-                  const practicasDocentes = formPracticasDocentes.getValues()
-                  const formacionDocente = formFormacionDocente.getValues()
-                  
+
                   await actualizarDiagnostico(diagnosticoActual.id, {
                     datosGenerales,
                     dimensionAprovechamiento: aprovechamiento,
-                    dimensionPracticasDocentes: practicasDocentes,
-                    dimensionFormacionDocente: formacionDocente,
                     estado: EstadoDiagnostico.BORRADOR
                   })
-                  
-                  // Si llegamos aquí, el guardado fue exitoso
+
                   alert('✓ Borrador guardado correctamente')
                 } catch (error) {
                   console.error('Error al guardar borrador:', error)
-                  alert('⚠️ Error al guardar el borrador. Verifique su conexión e inténtelo de nuevo.')
+                  alert('⚠️ Error al guardar el borrador')
                 }
               }}
             >
               💾 Guardar como Borrador
             </button>
-            
-            <button 
+
+            <button
               type="button"
               className={`flex-1 px-6 py-3 rounded-lg transition-colors ${
-                porcentajeCompletado >= 30
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                porcentajeCompletado >= 50
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
-              disabled={porcentajeCompletado < 30}
+              disabled={porcentajeCompletado < 50}
               onClick={async () => {
-                if (porcentajeCompletado >= 30) {
+                if (porcentajeCompletado >= 50) {
                   try {
                     if (!diagnosticoActual) {
                       alert('Error: No hay diagnóstico activo')
                       return
                     }
-                    
-                    // Guardar antes de enviar
-                    const datosCompletos = {
-                      datosGenerales: formDatosGenerales.getValues(),
-                      dimensionAprovechamiento: formAprovechamiento.getValues(),
-                      dimensionPracticasDocentes: formPracticasDocentes.getValues(),
-                      dimensionFormacionDocente: formFormacionDocente.getValues(),
+
+                    await actualizarDiagnostico(diagnosticoActual.id, {
+                      datosGenerales,
+                      dimensionAprovechamiento: aprovechamiento,
                       estado: EstadoDiagnostico.COMPLETADO
-                    }
-                    
-                    await actualizarDiagnostico(diagnosticoActual.id, datosCompletos)
-                    alert(`✓ Diagnóstico enviado para validación (${porcentajeCompletado}% completado)`)
+                    })
+
+                    alert(`✓ Diagnóstico enviado (${porcentajeCompletado}% completado)`)
                   } catch (error) {
                     console.error('Error al enviar diagnóstico:', error)
-                    alert('⚠️ Error al enviar el diagnóstico. Inténtelo de nuevo.')
+                    alert('⚠️ Error al enviar el diagnóstico')
                   }
                 }
               }}
             >
-              🚀 Enviar para Validación
+              🚀 Enviar Diagnóstico
             </button>
           </div>
-          
-          {porcentajeCompletado < 30 && (
+
+          {porcentajeCompletado < 50 && (
             <p className="text-xs text-center text-gray-500">
-              Necesitas completar al menos 30% del diagnóstico para enviarlo.
+              Completa al menos el 50% del diagnóstico para enviarlo
             </p>
           )}
         </div>
@@ -1601,6 +1261,9 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
         {pasoActual === 3 && renderPaso3()}
         {pasoActual === 4 && renderPaso4()}
         {pasoActual === 5 && renderPaso5()}
+        {pasoActual === 6 && renderPaso6()}
+        {pasoActual === 7 && renderPaso7()}
+        {pasoActual === 8 && renderPaso8()}
       </div>
 
       {/* Navigation */}
