@@ -300,3 +300,125 @@ export const diagnosticoFormDefaults: Partial<DatosGeneralesDiagnosticoFormData>
   },
   participantes: []
 }
+
+/**
+ * ============================================
+ * ESQUEMAS ZOD PARA FORMULARIOS DE GOOGLE FORMS
+ * ============================================
+ */
+
+// Esquema para respuesta Likert 1-5
+export const RespuestaLikert5Schema = z.number()
+  .int('Debe ser un número entero')
+  .min(1, 'El valor mínimo es 1')
+  .max(5, 'El valor máximo es 5')
+
+// Esquema para respuesta Likert 1-4
+export const RespuestaLikert4Schema = z.number()
+  .int('Debe ser un número entero')
+  .min(1, 'El valor mínimo es 1')
+  .max(4, 'El valor máximo es 4')
+
+// Esquema para una respuesta individual
+export const RespuestaFormularioSchema = z.object({
+  preguntaId: z.string().min(1, 'ID de pregunta requerido'),
+  preguntaTexto: z.string().min(1, 'Texto de pregunta requerido'),
+  tipoRespuesta: z.enum(['likert5', 'likert4', 'texto', 'numero', 'select', 'multiselect', 'boolean', 'fecha']),
+  respuestaNumerica: z.number().optional(),
+  respuestaTexto: z.string().optional(),
+  observaciones: z.string().optional()
+}).refine(
+  (data) => data.respuestaNumerica !== undefined || data.respuestaTexto !== undefined,
+  { message: 'Debe proporcionar una respuesta numérica o de texto' }
+)
+
+// Esquema para respuestas de un formulario completo
+export const FormularioRespuestasSchema = z.object({
+  formularioTipo: z.enum(['ambiente_familiar', 'desarrollo_integral', 'ambiente_aprendizaje', 'practicas_docentes', 'formacion_docente']),
+  respuestas: z.record(z.string(), RespuestaFormularioSchema),
+  porcentajeCompletitud: z.number().min(0).max(100)
+})
+
+// Tipo derivado
+export type FormularioRespuestasFormData = z.infer<typeof FormularioRespuestasSchema>
+
+// Validación de completitud mínima (80%)
+export const validarCompletitudMinima = (porcentaje: number): boolean => {
+  return porcentaje >= 80
+}
+
+// Validación de consistencia (detectar respuestas todas iguales)
+export const validarConsistenciaRespuestas = (respuestas: Record<string, any>): {
+  valido: boolean
+  mensaje?: string
+} => {
+  const valoresNumericos = Object.values(respuestas)
+    .filter((r: any) => typeof r.respuestaNumerica === 'number')
+    .map((r: any) => r.respuestaNumerica)
+
+  if (valoresNumericos.length > 10) {
+    const todasIguales = valoresNumericos.every(v => v === valoresNumericos[0])
+
+    if (todasIguales) {
+      return {
+        valido: false,
+        mensaje: '⚠️ Todas las respuestas tienen el mismo valor. Por favor revisa que sean correctas.'
+      }
+    }
+  }
+
+  return { valido: true }
+}
+
+// Reglas de alertas automáticas
+export interface ReglaAlerta {
+  condicion: (datos: any) => boolean
+  nivel: 'info' | 'warning' | 'error'
+  mensaje: string
+  accionSugerida?: string
+}
+
+export const reglasAlertasDiagnostico: ReglaAlerta[] = [
+  {
+    condicion: (d) => d.indicadoresAcademicos?.eficienciaTerminal < 70,
+    nivel: 'error',
+    mensaje: '⚠️ Eficiencia terminal crítica (< 70%)',
+    accionSugerida: 'Priorizar estrategias de retención escolar'
+  },
+  {
+    condicion: (d) => {
+      const promedio = (
+        (d.indicadoresAcademicos?.promedioGeneral1ro || 0) +
+        (d.indicadoresAcademicos?.promedioGeneral2do || 0) +
+        (d.indicadoresAcademicos?.promedioGeneral3ro || 0)
+      ) / 3
+      return promedio < 6.0 && promedio > 0
+    },
+    nivel: 'error',
+    mensaje: '⚠️ Promedio general muy bajo (< 6.0)',
+    accionSugerida: 'Revisar prácticas pedagógicas y apoyos'
+  },
+  {
+    condicion: (d) => d.indicadoresAcademicos?.indiceDesercion > 10,
+    nivel: 'warning',
+    mensaje: '⚠️ Índice de deserción alto (> 10%)',
+    accionSugerida: 'Implementar programa de seguimiento a estudiantes en riesgo'
+  },
+  {
+    condicion: (d) => d.asistenciaAlumnos?.promedioAsistencia < 85,
+    nivel: 'warning',
+    mensaje: 'ℹ️ Asistencia por debajo del estándar (< 85%)',
+    accionSugerida: 'Reforzar estrategias de control de ausentismo'
+  }
+]
+
+// Función para evaluar alertas
+export const evaluarAlertas = (datos: any): ReglaAlerta[] => {
+  return reglasAlertasDiagnostico.filter(regla => {
+    try {
+      return regla.condicion(datos)
+    } catch {
+      return false
+    }
+  })
+}

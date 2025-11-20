@@ -255,3 +255,133 @@ export interface PlantillaDimension {
     }[]
   }[]
 }
+
+/**
+ * ============================================
+ * TIPOS PARA FORMULARIOS DE GOOGLE FORMS
+ * ============================================
+ */
+
+/**
+ * Tipos de formularios basados en Google Forms
+ */
+export enum FormularioTipo {
+  AMBIENTE_FAMILIAR = 'ambiente_familiar',
+  DESARROLLO_INTEGRAL = 'desarrollo_integral',
+  AMBIENTE_APRENDIZAJE = 'ambiente_aprendizaje',
+  PRACTICAS_DOCENTES = 'practicas_docentes',
+  FORMACION_DOCENTE = 'formacion_docente'
+}
+
+/**
+ * Tipos de preguntas soportadas
+ */
+export enum TipoPregunta {
+  LIKERT5 = 'likert5',        // Escala 1-5
+  LIKERT4 = 'likert4',        // Escala 1-4
+  TEXTO = 'texto',            // Texto libre
+  NUMERO = 'numero',          // Numérico
+  SELECT = 'select',          // Selección única
+  MULTISELECT = 'multiselect', // Selección múltiple
+  BOOLEAN = 'boolean',        // Sí/No
+  FECHA = 'fecha'             // Fecha
+}
+
+/**
+ * Configuración de una pregunta individual
+ */
+export interface PreguntaConfig {
+  id: string
+  texto: string
+  tipo: TipoPregunta
+  opciones?: string[]          // Para select/multiselect
+  requerido?: boolean
+  ayuda?: string               // Texto de ayuda
+  placeholder?: string         // Placeholder para inputs
+  min?: number                 // Para números
+  max?: number                 // Para números
+  step?: number                // Para números
+}
+
+/**
+ * Configuración de una sección de preguntas
+ */
+export interface SeccionConfig {
+  id: string
+  titulo: string
+  descripcion?: string
+  preguntas: PreguntaConfig[]
+}
+
+/**
+ * Configuración completa de un formulario
+ */
+export interface FormularioConfig {
+  formularioTipo: FormularioTipo
+  version: string
+  titulo: string
+  descripcion: string
+  icono?: string
+  secciones: SeccionConfig[]
+}
+
+/**
+ * Respuesta a una pregunta individual
+ */
+export interface RespuestaFormulario {
+  id?: string
+  diagnosticoId: string
+  formularioTipo: FormularioTipo
+  seccion: string
+  preguntaId: string
+  preguntaTexto: string
+  tipoRespuesta: TipoPregunta
+  respuestaNumerica?: number
+  respuestaTexto?: string
+  observaciones?: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+/**
+ * Indicador calculado a partir de respuestas
+ */
+export interface IndicadorCalculado {
+  id?: string
+  diagnosticoId: string
+  dimension: string
+  criterio: string
+  valorNumerico: number
+  nivelDesempeno: 'EXCELENTE' | 'BUENO' | 'REGULAR' | 'DEFICIENTE'
+  calculadoDesde: string[]  // Array de pregunta_ids
+  metadatos?: {
+    desviacionEstandar?: number
+    minimo?: number
+    maximo?: number
+    n?: number  // Cantidad de respuestas
+    correlaciones?: Record<string, number>
+  }
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+/**
+ * Estado de progreso de un formulario
+ */
+export interface ProgresoFormulario {
+  formularioTipo: FormularioTipo
+  totalPreguntas: number
+  preguntasRespondidas: number
+  porcentajeCompletitud: number
+  ultimaActualizacion?: Date
+}
+
+/**
+ * Resumen de todos los formularios de un diagnóstico
+ */
+export interface ResumenFormularios {
+  diagnosticoId: string
+  progresos: ProgresoFormulario[]
+  porcentajeTotal: number
+  todosCompletos: boolean
+}
