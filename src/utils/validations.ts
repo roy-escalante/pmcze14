@@ -33,7 +33,7 @@ const ContactoSchema = z.object({
 // Esquema principal para escuela
 export const EscuelaFormSchema = z.object({
   cct: z.string()
-    .regex(/^14DTV\d{4}K$/, 'CCT debe tener el formato 14DTV####K (ej: 14DTV0041K)')
+    .regex(/^24EST\d{4}[A-Z]$/, 'CCT debe tener el formato 24EST####X (ej: 24EST0041C)')
     .length(10, 'CCT debe tener exactamente 10 caracteres'),
   
   nombre: z.string()
@@ -97,8 +97,13 @@ export const escuelaFormDefaults: Partial<EscuelaFormData> = {
 }
 
 // Función helper para generar CCT automático
+// Nota: El dígito verificador debe calcularse según el algoritmo oficial
+// Por ahora retorna formato básico 24EST####X
 export const generarCCT = (numeroEST: number): string => {
-  return `14DTV${String(numeroEST).padStart(4, '0')}K`
+  const digitos = String(numeroEST).padStart(4, '0')
+  // TODO: Implementar cálculo real del dígito verificador
+  // Por ahora usar 'X' como placeholder
+  return `24EST${digitos}X`
 }
 
 // Función helper para validar numero EST único
@@ -162,20 +167,71 @@ export const DatosGeneralesDiagnosticoSchema = z.object({
 // Esquemas para cada dimensión NEM
 export const DimensionAprovechamientoSchema = z.object({
   indicadoresAcademicos: z.object({
-    promedioGeneral: CriterioEvaluacionSchema,
-    eficienciaTerminal: CriterioEvaluacionSchema,
-    indiceReprobacion: CriterioEvaluacionSchema,
-    indiceDesercion: CriterioEvaluacionSchema
+    // Promedios por grado (valores numéricos 0.0 - 10.0)
+    promedioGeneral1ro: z.number()
+      .min(0, 'El promedio debe ser mayor o igual a 0')
+      .max(10, 'El promedio no puede ser mayor a 10'),
+    promedioGeneral2do: z.number()
+      .min(0, 'El promedio debe ser mayor o igual a 0')
+      .max(10, 'El promedio no puede ser mayor a 10'),
+    promedioGeneral3ro: z.number()
+      .min(0, 'El promedio debe ser mayor o igual a 0')
+      .max(10, 'El promedio no puede ser mayor a 10'),
+
+    // Porcentajes (valores numéricos 0 - 100)
+    eficienciaTerminal: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100'),
+    indiceReprobacion: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100'),
+    indiceDesercion: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100')
   }),
   evaluacionesExternas: z.object({
     planea: CriterioEvaluacionSchema.optional(),
     enlace: CriterioEvaluacionSchema.optional(),
     otras: z.array(CriterioEvaluacionSchema).optional()
-  }),
+  }).optional(),
   asistenciaAlumnos: z.object({
-    promedioAsistencia: CriterioEvaluacionSchema,
-    ausentismoCronico: CriterioEvaluacionSchema
-  })
+    // Porcentaje numérico 0-100
+    promedioAsistencia: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100'),
+
+    // Campo de texto descriptivo (NO "crónico", solo "Control de ausentismo")
+    controlAusentismo: z.string()
+      .min(10, 'Debe describir las medidas implementadas (mínimo 10 caracteres)')
+      .max(500, 'La descripción no puede exceder 500 caracteres')
+  }),
+  // NUEVO: Ejercicios Integradores de Aprendizaje
+  ejerciciosIntegradores: z.object({
+    // Opción 1: Subir documento PDF
+    documentoPDF: z.string().optional(), // URL del archivo subido
+
+    // Opción 2: Captura manual por área y categoría
+    areas: z.object({
+      manejoInformacion: z.object({
+        noEvidencia: z.number().int().min(0, 'Debe ser un número positivo'),
+        requiereApoyo: z.number().int().min(0, 'Debe ser un número positivo'),
+        enProceso: z.number().int().min(0, 'Debe ser un número positivo'),
+        alcanzado: z.number().int().min(0, 'Debe ser un número positivo')
+      }).optional(),
+      discriminacionInformacion: z.object({
+        noEvidencia: z.number().int().min(0, 'Debe ser un número positivo'),
+        requiereApoyo: z.number().int().min(0, 'Debe ser un número positivo'),
+        enProceso: z.number().int().min(0, 'Debe ser un número positivo'),
+        alcanzado: z.number().int().min(0, 'Debe ser un número positivo')
+      }).optional(),
+      calculoMental: z.object({
+        noEvidencia: z.number().int().min(0, 'Debe ser un número positivo'),
+        requiereApoyo: z.number().int().min(0, 'Debe ser un número positivo'),
+        enProceso: z.number().int().min(0, 'Debe ser un número positivo'),
+        alcanzado: z.number().int().min(0, 'Debe ser un número positivo')
+      }).optional()
+    }).optional()
+  }).optional()
 })
 
 export const DimensionPracticasDocentesSchema = z.object({
@@ -243,4 +299,126 @@ export const diagnosticoFormDefaults: Partial<DatosGeneralesDiagnosticoFormData>
     email: ''
   },
   participantes: []
+}
+
+/**
+ * ============================================
+ * ESQUEMAS ZOD PARA FORMULARIOS DE GOOGLE FORMS
+ * ============================================
+ */
+
+// Esquema para respuesta Likert 1-5
+export const RespuestaLikert5Schema = z.number()
+  .int('Debe ser un número entero')
+  .min(1, 'El valor mínimo es 1')
+  .max(5, 'El valor máximo es 5')
+
+// Esquema para respuesta Likert 1-4
+export const RespuestaLikert4Schema = z.number()
+  .int('Debe ser un número entero')
+  .min(1, 'El valor mínimo es 1')
+  .max(4, 'El valor máximo es 4')
+
+// Esquema para una respuesta individual
+export const RespuestaFormularioSchema = z.object({
+  preguntaId: z.string().min(1, 'ID de pregunta requerido'),
+  preguntaTexto: z.string().min(1, 'Texto de pregunta requerido'),
+  tipoRespuesta: z.enum(['likert5', 'likert4', 'texto', 'numero', 'select', 'multiselect', 'boolean', 'fecha']),
+  respuestaNumerica: z.number().optional(),
+  respuestaTexto: z.string().optional(),
+  observaciones: z.string().optional()
+}).refine(
+  (data) => data.respuestaNumerica !== undefined || data.respuestaTexto !== undefined,
+  { message: 'Debe proporcionar una respuesta numérica o de texto' }
+)
+
+// Esquema para respuestas de un formulario completo
+export const FormularioRespuestasSchema = z.object({
+  formularioTipo: z.enum(['ambiente_familiar', 'desarrollo_integral', 'ambiente_aprendizaje', 'practicas_docentes', 'formacion_docente']),
+  respuestas: z.record(z.string(), RespuestaFormularioSchema),
+  porcentajeCompletitud: z.number().min(0).max(100)
+})
+
+// Tipo derivado
+export type FormularioRespuestasFormData = z.infer<typeof FormularioRespuestasSchema>
+
+// Validación de completitud mínima (80%)
+export const validarCompletitudMinima = (porcentaje: number): boolean => {
+  return porcentaje >= 80
+}
+
+// Validación de consistencia (detectar respuestas todas iguales)
+export const validarConsistenciaRespuestas = (respuestas: Record<string, any>): {
+  valido: boolean
+  mensaje?: string
+} => {
+  const valoresNumericos = Object.values(respuestas)
+    .filter((r: any) => typeof r.respuestaNumerica === 'number')
+    .map((r: any) => r.respuestaNumerica)
+
+  if (valoresNumericos.length > 10) {
+    const todasIguales = valoresNumericos.every(v => v === valoresNumericos[0])
+
+    if (todasIguales) {
+      return {
+        valido: false,
+        mensaje: '⚠️ Todas las respuestas tienen el mismo valor. Por favor revisa que sean correctas.'
+      }
+    }
+  }
+
+  return { valido: true }
+}
+
+// Reglas de alertas automáticas
+export interface ReglaAlerta {
+  condicion: (datos: any) => boolean
+  nivel: 'info' | 'warning' | 'error'
+  mensaje: string
+  accionSugerida?: string
+}
+
+export const reglasAlertasDiagnostico: ReglaAlerta[] = [
+  {
+    condicion: (d) => d.indicadoresAcademicos?.eficienciaTerminal < 70,
+    nivel: 'error',
+    mensaje: '⚠️ Eficiencia terminal crítica (< 70%)',
+    accionSugerida: 'Priorizar estrategias de retención escolar'
+  },
+  {
+    condicion: (d) => {
+      const promedio = (
+        (d.indicadoresAcademicos?.promedioGeneral1ro || 0) +
+        (d.indicadoresAcademicos?.promedioGeneral2do || 0) +
+        (d.indicadoresAcademicos?.promedioGeneral3ro || 0)
+      ) / 3
+      return promedio < 6.0 && promedio > 0
+    },
+    nivel: 'error',
+    mensaje: '⚠️ Promedio general muy bajo (< 6.0)',
+    accionSugerida: 'Revisar prácticas pedagógicas y apoyos'
+  },
+  {
+    condicion: (d) => d.indicadoresAcademicos?.indiceDesercion > 10,
+    nivel: 'warning',
+    mensaje: '⚠️ Índice de deserción alto (> 10%)',
+    accionSugerida: 'Implementar programa de seguimiento a estudiantes en riesgo'
+  },
+  {
+    condicion: (d) => d.asistenciaAlumnos?.promedioAsistencia < 85,
+    nivel: 'warning',
+    mensaje: 'ℹ️ Asistencia por debajo del estándar (< 85%)',
+    accionSugerida: 'Reforzar estrategias de control de ausentismo'
+  }
+]
+
+// Función para evaluar alertas
+export const evaluarAlertas = (datos: any): ReglaAlerta[] => {
+  return reglasAlertasDiagnostico.filter(regla => {
+    try {
+      return regla.condicion(datos)
+    } catch {
+      return false
+    }
+  })
 }

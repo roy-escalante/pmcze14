@@ -190,35 +190,95 @@ INSERT INTO usuarios (id, email, nombre, apellidos, rol, zona_escolar, telefono)
 ('550e8400-e29b-41d4-a716-446655440004', 'director2@ze14.edu.mx', 'José Luis', 'Ramírez Santos', 'DIRECTOR', '014', '4811234570')
 ON CONFLICT (email) DO NOTHING;
 
--- Insertar escuelas de prueba
+-- Insertar escuelas de prueba (6 Escuelas Secundarias Técnicas - Zona 14)
+-- Región Sur: EST 4, 7, 82
+-- Región Norte: EST 41, 77, 81
 INSERT INTO escuelas (id, nombre, cct, nivel, turno, modalidad, director, zona_escolar, region, direccion, contacto, estadisticas) VALUES
+-- REGIÓN SUR
 (
     '660e8400-e29b-41d4-a716-446655440001',
+    'Escuela Secundaria Técnica No. 4',
+    '24EST0004D',
+    'Secundaria Técnica',
+    'MATUTINO',
+    'Presencial',
+    'Director EST 4',
+    '014',
+    'HUASTECA_SUR',
+    '{"calle": "Calle Principal", "colonia": "Centro", "municipio": "Tamazunchale", "localidad": "Tamazunchale", "codigoPostal": "79960"}',
+    '{"telefono": "4891234001", "email": "est4@escuelas.slp.gob.mx", "celular": "4891234001"}',
+    '{"totalAlumnos": 280, "totalDocentes": 15, "gruposPorGrado": {"1": 3, "2": 3, "3": 3}}'
+),
+(
+    '660e8400-e29b-41d4-a716-446655440002',
+    'Escuela Secundaria Técnica No. 7',
+    '24EST0007A',
+    'Secundaria Técnica',
+    'MATUTINO',
+    'Presencial',
+    'Director EST 7',
+    '014',
+    'HUASTECA_SUR',
+    '{"calle": "Av. Juárez", "colonia": "Centro", "municipio": "Tamazunchale", "localidad": "Tamazunchale", "codigoPostal": "79960"}',
+    '{"telefono": "4891234002", "email": "est7@escuelas.slp.gob.mx", "celular": "4891234002"}',
+    '{"totalAlumnos": 250, "totalDocentes": 14, "gruposPorGrado": {"1": 3, "2": 3, "3": 2}}'
+),
+(
+    '660e8400-e29b-41d4-a716-446655440003',
+    'Escuela Secundaria Técnica No. 82',
+    '24EST0082D',
+    'Secundaria Técnica',
+    'VESPERTINO',
+    'Presencial',
+    'Director EST 82',
+    '014',
+    'HUASTECA_SUR',
+    '{"calle": "Calle Hidalgo", "colonia": "Benito Juárez", "municipio": "Tamazunchale", "localidad": "Tamazunchale", "codigoPostal": "79960"}',
+    '{"telefono": "4891234003", "email": "est82@escuelas.slp.gob.mx", "celular": "4891234003"}',
+    '{"totalAlumnos": 210, "totalDocentes": 12, "gruposPorGrado": {"1": 2, "2": 2, "3": 2}}'
+),
+-- REGIÓN NORTE
+(
+    '660e8400-e29b-41d4-a716-446655440004',
+    'Escuela Secundaria Técnica No. 41',
+    '24EST0041C',
+    'Secundaria Técnica',
+    'MATUTINO',
+    'Presencial',
+    'Director EST 41',
+    '014',
+    'HUASTECA_NORTE',
+    '{"calle": "Av. Principal", "colonia": "Centro", "municipio": "Ciudad Valles", "localidad": "Ciudad Valles", "codigoPostal": "79000"}',
+    '{"telefono": "4811234004", "email": "est41@escuelas.slp.gob.mx", "celular": "4811234004"}',
+    '{"totalAlumnos": 350, "totalDocentes": 20, "gruposPorGrado": {"1": 4, "2": 4, "3": 4}}'
+),
+(
+    '660e8400-e29b-41d4-a716-446655440005',
+    'Escuela Secundaria Técnica No. 77',
+    '24EST0077B',
+    'Secundaria Técnica',
+    'MATUTINO',
+    'Presencial',
+    'Director EST 77',
+    '014',
+    'HUASTECA_NORTE',
+    '{"calle": "Calle Morelos", "colonia": "Centro", "municipio": "Tamuín", "localidad": "Tamuín", "codigoPostal": "79100"}',
+    '{"telefono": "4811234005", "email": "est77@escuelas.slp.gob.mx", "celular": "4811234005"}',
+    '{"totalAlumnos": 300, "totalDocentes": 17, "gruposPorGrado": {"1": 3, "2": 3, "3": 3}}'
+),
+(
+    '660e8400-e29b-41d4-a716-446655440006',
     'Escuela Secundaria Técnica No. 81',
-    '24DTV0081K',
+    '24EST0081E',
     'Secundaria Técnica',
     'MATUTINO',
     'Presencial',
     'Ana Patricia Rodríguez Vega',
     '014',
-    'HUASTECA_CENTRO',
+    'HUASTECA_NORTE',
     '{"calle": "Av. Juárez No. 123", "colonia": "Centro", "municipio": "Ciudad Valles", "localidad": "Ciudad Valles", "codigoPostal": "79000"}',
     '{"telefono": "4811234569", "email": "est81@escuelas.slp.gob.mx", "celular": "4811234569"}',
     '{"totalAlumnos": 320, "totalDocentes": 18, "gruposPorGrado": {"1": 4, "2": 4, "3": 4}}'
-),
-(
-    '660e8400-e29b-41d4-a716-446655440002',
-    'Escuela Secundaria Técnica No. 94',
-    '24DTV0094P',
-    'Secundaria Técnica',
-    'VESPERTINO',
-    'Presencial',
-    'José Luis Ramírez Santos',
-    '014',
-    'HUASTECA_NORTE',
-    '{"calle": "Calle Hidalgo No. 456", "colonia": "Benito Juárez", "municipio": "Tamuín", "localidad": "Tamuín", "codigoPostal": "79100"}',
-    '{"telefono": "4811234570", "email": "est94@escuelas.slp.gob.mx", "celular": "4811234570"}',
-    '{"totalAlumnos": 280, "totalDocentes": 16, "gruposPorGrado": {"1": 3, "2": 3, "3": 3}}'
 )
 ON CONFLICT (cct) DO NOTHING;
 
