@@ -33,7 +33,7 @@ const ContactoSchema = z.object({
 // Esquema principal para escuela
 export const EscuelaFormSchema = z.object({
   cct: z.string()
-    .regex(/^14DTV\d{4}K$/, 'CCT debe tener el formato 14DTV####K (ej: 14DTV0041K)')
+    .regex(/^24EST\d{4}[A-Z]$/, 'CCT debe tener el formato 24EST####X (ej: 24EST0041C)')
     .length(10, 'CCT debe tener exactamente 10 caracteres'),
   
   nombre: z.string()
@@ -97,8 +97,13 @@ export const escuelaFormDefaults: Partial<EscuelaFormData> = {
 }
 
 // Función helper para generar CCT automático
+// Nota: El dígito verificador debe calcularse según el algoritmo oficial
+// Por ahora retorna formato básico 24EST####X
 export const generarCCT = (numeroEST: number): string => {
-  return `14DTV${String(numeroEST).padStart(4, '0')}K`
+  const digitos = String(numeroEST).padStart(4, '0')
+  // TODO: Implementar cálculo real del dígito verificador
+  // Por ahora usar 'X' como placeholder
+  return `24EST${digitos}X`
 }
 
 // Función helper para validar numero EST único
@@ -162,20 +167,71 @@ export const DatosGeneralesDiagnosticoSchema = z.object({
 // Esquemas para cada dimensión NEM
 export const DimensionAprovechamientoSchema = z.object({
   indicadoresAcademicos: z.object({
-    promedioGeneral: CriterioEvaluacionSchema,
-    eficienciaTerminal: CriterioEvaluacionSchema,
-    indiceReprobacion: CriterioEvaluacionSchema,
-    indiceDesercion: CriterioEvaluacionSchema
+    // Promedios por grado (valores numéricos 0.0 - 10.0)
+    promedioGeneral1ro: z.number()
+      .min(0, 'El promedio debe ser mayor o igual a 0')
+      .max(10, 'El promedio no puede ser mayor a 10'),
+    promedioGeneral2do: z.number()
+      .min(0, 'El promedio debe ser mayor o igual a 0')
+      .max(10, 'El promedio no puede ser mayor a 10'),
+    promedioGeneral3ro: z.number()
+      .min(0, 'El promedio debe ser mayor o igual a 0')
+      .max(10, 'El promedio no puede ser mayor a 10'),
+
+    // Porcentajes (valores numéricos 0 - 100)
+    eficienciaTerminal: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100'),
+    indiceReprobacion: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100'),
+    indiceDesercion: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100')
   }),
   evaluacionesExternas: z.object({
     planea: CriterioEvaluacionSchema.optional(),
     enlace: CriterioEvaluacionSchema.optional(),
     otras: z.array(CriterioEvaluacionSchema).optional()
-  }),
+  }).optional(),
   asistenciaAlumnos: z.object({
-    promedioAsistencia: CriterioEvaluacionSchema,
-    ausentismoCronico: CriterioEvaluacionSchema
-  })
+    // Porcentaje numérico 0-100
+    promedioAsistencia: z.number()
+      .min(0, 'El porcentaje debe ser mayor o igual a 0')
+      .max(100, 'El porcentaje no puede ser mayor a 100'),
+
+    // Campo de texto descriptivo (NO "crónico", solo "Control de ausentismo")
+    controlAusentismo: z.string()
+      .min(10, 'Debe describir las medidas implementadas (mínimo 10 caracteres)')
+      .max(500, 'La descripción no puede exceder 500 caracteres')
+  }),
+  // NUEVO: Ejercicios Integradores de Aprendizaje
+  ejerciciosIntegradores: z.object({
+    // Opción 1: Subir documento PDF
+    documentoPDF: z.string().optional(), // URL del archivo subido
+
+    // Opción 2: Captura manual por área y categoría
+    areas: z.object({
+      manejoInformacion: z.object({
+        noEvidencia: z.number().int().min(0, 'Debe ser un número positivo'),
+        requiereApoyo: z.number().int().min(0, 'Debe ser un número positivo'),
+        enProceso: z.number().int().min(0, 'Debe ser un número positivo'),
+        alcanzado: z.number().int().min(0, 'Debe ser un número positivo')
+      }).optional(),
+      discriminacionInformacion: z.object({
+        noEvidencia: z.number().int().min(0, 'Debe ser un número positivo'),
+        requiereApoyo: z.number().int().min(0, 'Debe ser un número positivo'),
+        enProceso: z.number().int().min(0, 'Debe ser un número positivo'),
+        alcanzado: z.number().int().min(0, 'Debe ser un número positivo')
+      }).optional(),
+      calculoMental: z.object({
+        noEvidencia: z.number().int().min(0, 'Debe ser un número positivo'),
+        requiereApoyo: z.number().int().min(0, 'Debe ser un número positivo'),
+        enProceso: z.number().int().min(0, 'Debe ser un número positivo'),
+        alcanzado: z.number().int().min(0, 'Debe ser un número positivo')
+      }).optional()
+    }).optional()
+  }).optional()
 })
 
 export const DimensionPracticasDocentesSchema = z.object({

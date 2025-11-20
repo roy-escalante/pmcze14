@@ -155,38 +155,39 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
     resolver: zodResolver(DimensionAprovechamientoSchema),
     defaultValues: {
       indicadoresAcademicos: {
-        promedioGeneral: { 
-          id: 'promedio_general', 
-          nombre: 'Promedio General', 
-          descripcion: 'Evalúa el rendimiento académico promedio de todos los estudiantes del plantel'
-        },
-        eficienciaTerminal: { 
-          id: 'eficiencia_terminal', 
-          nombre: 'Eficiencia Terminal', 
-          descripcion: 'Porcentaje de estudiantes que completan exitosamente el nivel educativo'
-        },
-        indiceReprobacion: { 
-          id: 'indice_reprobacion', 
-          nombre: 'Índice de Reprobación', 
-          descripcion: 'Porcentaje de estudiantes que no aprueban las materias o grados escolares'
-        },
-        indiceDesercion: { 
-          id: 'indice_desercion', 
-          nombre: 'Índice de Deserción', 
-          descripcion: 'Porcentaje de estudiantes que abandonan sus estudios antes de completar el nivel educativo'
-        }
+        // Valores numéricos por defecto
+        promedioGeneral1ro: 0,
+        promedioGeneral2do: 0,
+        promedioGeneral3ro: 0,
+        eficienciaTerminal: 0,
+        indiceReprobacion: 0,
+        indiceDesercion: 0
       },
-      evaluacionesExternas: {},
       asistenciaAlumnos: {
-        promedioAsistencia: { 
-          id: 'promedio_asistencia', 
-          nombre: 'Promedio de Asistencia', 
-          descripcion: 'Porcentaje promedio de asistencia de los estudiantes a clases'
-        },
-        ausentismoCronico: { 
-          id: 'ausentismo_cronico', 
-          nombre: 'Ausentismo Crónico', 
-          descripcion: 'Medidas implementadas para reducir el ausentismo frecuente de estudiantes'
+        promedioAsistencia: 0,
+        controlAusentismo: ''
+      },
+      ejerciciosIntegradores: {
+        documentoPDF: '',
+        areas: {
+          manejoInformacion: {
+            noEvidencia: 0,
+            requiereApoyo: 0,
+            enProceso: 0,
+            alcanzado: 0
+          },
+          discriminacionInformacion: {
+            noEvidencia: 0,
+            requiereApoyo: 0,
+            enProceso: 0,
+            alcanzado: 0
+          },
+          calculoMental: {
+            noEvidencia: 0,
+            requiereApoyo: 0,
+            enProceso: 0,
+            alcanzado: 0
+          }
         }
       }
     }
@@ -750,85 +751,227 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
     <div className="space-y-8">
       <div className="bg-green-50 border border-green-200 rounded-lg p-6">
         <h3 className="text-xl font-bold text-green-900 mb-4">
-          Dimensión 1: Aprovechamiento Académico y Asistencia
+          Aprovechamiento Académico y Asistencia
         </h3>
         <p className="text-green-700">
-          Evalúa el rendimiento académico general y los patrones de asistencia de los estudiantes.
+          Ingrese los datos numéricos del rendimiento académico y asistencia de los estudiantes.
         </p>
       </div>
 
-      <div className="space-y-6">
+      {/* PROMEDIOS GENERALES POR GRADO */}
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-          Indicadores Académicos
+          Promedios Generales por Grado
         </h4>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'indicadoresAcademicos.promedioGeneral',
-            'Promedio General de la Escuela',
-            'Evalúa el rendimiento académico promedio de todos los estudiantes del plantel',
-            formAprovechamiento.register,
-            formAprovechamiento.formState.errors,
-            formAprovechamiento.watch,
-            formAprovechamiento.setValue
-          )}
+        <p className="text-sm text-gray-600">Ingrese los promedios en escala 0.0 - 10.0</p>
 
-          {renderCriterioEvaluacion(
-            'indicadoresAcademicos.eficienciaTerminal',
-            'Eficiencia Terminal',
-            'Porcentaje de estudiantes que completan exitosamente el nivel educativo',
-            formAprovechamiento.register,
-            formAprovechamiento.formState.errors,
-            formAprovechamiento.watch,
-            formAprovechamiento.setValue
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Promedio 1° Grado *
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              {...formAprovechamiento.register('indicadoresAcademicos.promedioGeneral1ro', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0.0"
+            />
+            {formAprovechamiento.formState.errors.indicadoresAcademicos?.promedioGeneral1ro && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.indicadoresAcademicos.promedioGeneral1ro.message}
+              </p>
+            )}
+          </div>
 
-          {renderCriterioEvaluacion(
-            'indicadoresAcademicos.indiceReprobacion',
-            'Índice de Reprobación',
-            'Porcentaje de estudiantes que no aprueban las materias o grados escolares',
-            formAprovechamiento.register,
-            formAprovechamiento.formState.errors,
-            formAprovechamiento.watch,
-            formAprovechamiento.setValue
-          )}
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Promedio 2° Grado *
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              {...formAprovechamiento.register('indicadoresAcademicos.promedioGeneral2do', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0.0"
+            />
+            {formAprovechamiento.formState.errors.indicadoresAcademicos?.promedioGeneral2do && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.indicadoresAcademicos.promedioGeneral2do.message}
+              </p>
+            )}
+          </div>
 
-          {renderCriterioEvaluacion(
-            'indicadoresAcademicos.indiceDesercion',
-            'Índice de Deserción Escolar',
-            'Porcentaje de estudiantes que abandonan sus estudios durante el ciclo escolar',
-            formAprovechamiento.register,
-            formAprovechamiento.formState.errors,
-            formAprovechamiento.watch,
-            formAprovechamiento.setValue
-          )}
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Promedio 3° Grado *
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              {...formAprovechamiento.register('indicadoresAcademicos.promedioGeneral3ro', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0.0"
+            />
+            {formAprovechamiento.formState.errors.indicadoresAcademicos?.promedioGeneral3ro && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.indicadoresAcademicos.promedioGeneral3ro.message}
+              </p>
+            )}
+          </div>
         </div>
+      </div>
 
-        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mt-8">
+      {/* INDICADORES PORCENTUALES */}
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+          Indicadores Académicos (Porcentajes)
+        </h4>
+        <p className="text-sm text-gray-600">Ingrese los porcentajes en escala 0 - 100</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Eficiencia Terminal (%) *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Porcentaje de estudiantes que completan exitosamente el nivel educativo
+            </p>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              {...formAprovechamiento.register('indicadoresAcademicos.eficienciaTerminal', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0"
+            />
+            {formAprovechamiento.formState.errors.indicadoresAcademicos?.eficienciaTerminal && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.indicadoresAcademicos.eficienciaTerminal.message}
+              </p>
+            )}
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Índice de Reprobación (%) *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Porcentaje de estudiantes que no aprueban las materias
+            </p>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              {...formAprovechamiento.register('indicadoresAcademicos.indiceReprobacion', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0"
+            />
+            {formAprovechamiento.formState.errors.indicadoresAcademicos?.indiceReprobacion && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.indicadoresAcademicos.indiceReprobacion.message}
+              </p>
+            )}
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Índice de Deserción (%) *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Porcentaje de estudiantes que abandonan sus estudios
+            </p>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              {...formAprovechamiento.register('indicadoresAcademicos.indiceDesercion', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0"
+            />
+            {formAprovechamiento.formState.errors.indicadoresAcademicos?.indiceDesercion && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.indicadoresAcademicos.indiceDesercion.message}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ASISTENCIA */}
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
           Asistencia de Estudiantes
         </h4>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderCriterioEvaluacion(
-            'asistenciaAlumnos.promedioAsistencia',
-            'Promedio de Asistencia',
-            'Porcentaje promedio de asistencia de los estudiantes a clases',
-            formAprovechamiento.register,
-            formAprovechamiento.formState.errors,
-            formAprovechamiento.watch,
-            formAprovechamiento.setValue
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Promedio de Asistencia (%) *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Porcentaje promedio de asistencia de los estudiantes a clases
+            </p>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              {...formAprovechamiento.register('asistenciaAlumnos.promedioAsistencia', { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0"
+            />
+            {formAprovechamiento.formState.errors.asistenciaAlumnos?.promedioAsistencia && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.asistenciaAlumnos.promedioAsistencia.message}
+              </p>
+            )}
+          </div>
 
-          {renderCriterioEvaluacion(
-            'asistenciaAlumnos.ausentismoCronico',
-            'Control del Ausentismo Crónico',
-            'Medidas implementadas para reducir el ausentismo frecuente de estudiantes',
-            formAprovechamiento.register,
-            formAprovechamiento.formState.errors,
-            formAprovechamiento.watch,
-            formAprovechamiento.setValue
-          )}
+          <div className="bg-white border border-gray-200 rounded-lg p-4 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Control de Ausentismo *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Describa las medidas implementadas para controlar y reducir el ausentismo
+            </p>
+            <textarea
+              {...formAprovechamiento.register('asistenciaAlumnos.controlAusentismo')}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Ej: Llamadas telefónicas a padres, visitas domiciliarias, seguimiento semanal..."
+            />
+            {formAprovechamiento.formState.errors.asistenciaAlumnos?.controlAusentismo && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {formAprovechamiento.formState.errors.asistenciaAlumnos.controlAusentismo.message}
+              </p>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* EJERCICIOS INTEGRADORES - Placeholder para siguiente tarea */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-700">
+          <strong>Próximamente:</strong> Sección de Ejercicios Integradores de Aprendizaje (EIA)
+        </p>
       </div>
     </div>
   )
