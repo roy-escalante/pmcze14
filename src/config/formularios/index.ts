@@ -5,16 +5,20 @@
 
 import { FormularioConfig, FormularioTipo } from '../../types'
 import { formularioAmbienteFamiliar } from './ambiente-familiar'
+import { formularioDesarrolloIntegral } from './desarrollo-integral'
+import { formularioAmbienteAprendizaje } from './ambiente-aprendizaje'
+import { formularioPracticasDocentes } from './practicas-docentes'
+import { formularioFormacionDocente } from './formacion-docente'
 
-// Los otros formularios se crearán con estructura similar
-// Por ahora exportamos el que tenemos completo y crearemos placeholders
-
+/**
+ * Configuración de todos los formularios del diagnóstico
+ */
 export const FORMULARIOS_CONFIG: Record<FormularioTipo, FormularioConfig> = {
   [FormularioTipo.AMBIENTE_FAMILIAR]: formularioAmbienteFamiliar,
-  [FormularioTipo.DESARROLLO_INTEGRAL]: formularioAmbienteFamiliar, // TODO: Crear
-  [FormularioTipo.AMBIENTE_APRENDIZAJE]: formularioAmbienteFamiliar, // TODO: Crear
-  [FormularioTipo.PRACTICAS_DOCENTES]: formularioAmbienteFamiliar, // TODO: Crear
-  [FormularioTipo.FORMACION_DOCENTE]: formularioAmbienteFamiliar, // TODO: Crear
+  [FormularioTipo.DESARROLLO_INTEGRAL]: formularioDesarrolloIntegral,
+  [FormularioTipo.AMBIENTE_APRENDIZAJE]: formularioAmbienteAprendizaje,
+  [FormularioTipo.PRACTICAS_DOCENTES]: formularioPracticasDocentes,
+  [FormularioTipo.FORMACION_DOCENTE]: formularioFormacionDocente,
 }
 
 /**
