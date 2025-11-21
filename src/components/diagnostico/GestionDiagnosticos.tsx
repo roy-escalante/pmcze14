@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Plus, Search, Filter, Eye, Edit, Trash2, Calendar, School, User, BarChart } from 'lucide-react'
 import { useDiagnostico, useEscuelas } from '../../stores'
 import { EstadoDiagnostico } from '../../types'
-import FormularioDiagnostico from './FormularioDiagnostico'
+import DiagnosticoDashboard from './DiagnosticoDashboard'
 import ResultadosDiagnostico from './ResultadosDiagnostico'
 
 type Vista = 'lista' | 'formulario' | 'resultados'
@@ -349,7 +349,7 @@ export default function GestionDiagnosticos() {
 
   if (vista === 'formulario') {
     return (
-      <FormularioDiagnostico
+      <DiagnosticoDashboard
         diagnosticoId={diagnosticoSeleccionado || undefined}
         onCancelar={handleVolver}
       />
