@@ -8,5 +8,8 @@ export { useAuth } from './supabaseAuthStore'
 export * from './escuelaStore'
 export * from './diagnosticoStore'
 
+// Sistema v2: Respuestas múltiples
+export * from './respuestasInstrumentosStore'
+
 // Store original (mantener para migración gradual)
 export * from './authStore'

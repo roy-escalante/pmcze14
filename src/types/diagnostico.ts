@@ -385,3 +385,130 @@ export interface ResumenFormularios {
   porcentajeTotal: number
   todosCompletos: boolean
 }
+
+/**
+ * ============================================
+ * SISTEMA DE RESPUESTAS MÚLTIPLES
+ * Versión 2.0 - Rediseño para múltiples entradas
+ * ============================================
+ */
+
+/**
+ * Roles posibles de respondentes
+ */
+export enum RolRespondente {
+  // Familia
+  PADRE = 'Padre',
+  MADRE = 'Madre',
+  TUTOR = 'Tutor',
+  ABUELO = 'Abuelo',
+  OTRO_FAMILIAR = 'Otro familiar',
+
+  // Estudiantes
+  ALUMNO = 'Alumno',
+  ALUMNA = 'Alumna',
+
+  // Personal educativo
+  DOCENTE = 'Docente',
+  DIRECTOR = 'Director',
+  SUBDIRECTOR = 'Subdirector',
+  PERSONAL_ADMINISTRATIVO = 'Personal administrativo',
+
+  // Otros
+  OBSERVADOR_EXTERNO = 'Observador externo'
+}
+
+/**
+ * Datos del respondente (información contextual)
+ */
+export interface DatosRespondente {
+  nombre: string
+  rol: RolRespondente
+
+  // Datos opcionales según el rol
+  grado?: string // '1°', '2°', '3°'
+  grupo?: string // 'A', 'B', 'C'
+  edad?: number
+  genero?: 'Masculino' | 'Femenino' | 'Otro' | 'Prefiero no decir'
+
+  // Para docentes
+  asignatura?: string
+  anosExperiencia?: number
+
+  // Metadatos
+  observaciones?: string
+}
+
+/**
+ * Respuesta completa de un instrumento (UNA entrada)
+ * Esta es la entidad principal del nuevo sistema
+ */
+export interface RespuestaInstrumento {
+  id?: string
+  diagnosticoId: string
+  formularioTipo: FormularioTipo
+
+  // Información del respondente
+  respondente: DatosRespondente
+
+  // Respuestas del formulario
+  respuestas: Record<string, {
+    preguntaId: string
+    valor: number | string | string[] | boolean
+    tipo: TipoPregunta
+  }>
+
+  // Métricas
+  porcentajeCompletitud: number
+
+  // Timestamps
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+/**
+ * Estadísticas agregadas de un tipo de instrumento
+ */
+export interface EstadisticasInstrumento {
+  diagnosticoId: string
+  formularioTipo: FormularioTipo
+
+  // Contadores
+  totalRespuestas: number
+  completitudPromedio: number
+
+  // Distribución
+  rolesDistintos: number
+  gradosDistintos: number
+
+  // Desglose por rol
+  porRol: Record<string, number>
+
+  // Desglose por grado (si aplica)
+  porGrado?: Record<string, number>
+}
+
+/**
+ * Resumen de progreso del diagnóstico v2
+ */
+export interface ResumenDiagnosticoV2 {
+  diagnosticoId: string
+
+  // Datos generales
+  datosGeneralesCompleto: boolean
+  indicadoresAcademicosCompleto: boolean
+
+  // Instrumentos
+  instrumentos: {
+    [key in FormularioTipo]: {
+      totalRespuestas: number
+      completitudPromedio: number
+      meta?: number // Meta opcional de respuestas a recolectar
+      porcentajeMeta?: number
+    }
+  }
+
+  // Global
+  progresoGeneral: number
+  readyParaAnalisis: boolean
+}

@@ -8,6 +8,13 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import {
+  generarRespuestaAmbienteFamiliar,
+  generarRespuestaDesarrolloIntegral,
+  generarRespuestaPracticasDocentes,
+  generarRespuestaFormacionDocente,
+  generarRespuestaAmbienteAprendizaje
+} from './generadores-respuestas'
 
 // Configuración de Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co'
@@ -508,13 +515,147 @@ async function seed() {
 
     console.log(`✅ ${diagnosticosInsertados?.length || 0} diagnósticos generados\n`)
 
-    // 4. RESUMEN FINAL
+    // 4. GENERAR RESPUESTAS MÚLTIPLES DE INSTRUMENTOS
+    console.log('📝 Generando respuestas de instrumentos (v2 - múltiples respondentes)...')
+    const respuestasInstrumentos: any[] = []
+
+    for (const diagnostico of diagnosticosInsertados || []) {
+      const escuela = escuelasInsertadas!.find(e => e.id === diagnostico.escuela_id)
+      if (!escuela) continue
+
+      const grados = ['1° Grado', '2° Grado', '3° Grado']
+      const grupos = ['A', 'B', 'C', 'D']
+
+      // A) AMBIENTE_FAMILIAR: 10-15 padres/tutores por escuela
+      const numPadres = Math.floor(Math.random() * 6) + 10 // 10-15
+      console.log(`   Generando ${numPadres} respuestas AMBIENTE_FAMILIAR para ${escuela.nombre}...`)
+      for (let i = 0; i < numPadres; i++) {
+        const gradoAleatorio = grados[Math.floor(Math.random() * grados.length)]
+        const respuesta = generarRespuestaAmbienteFamiliar(diagnostico.id, gradoAleatorio)
+        respuestasInstrumentos.push({
+          diagnostico_id: respuesta.diagnostico_id,
+          formulario_tipo: respuesta.formulario_tipo,
+          respondente_nombre: respuesta.respondente_nombre,
+          respondente_rol: respuesta.respondente_rol,
+          respondente_grado: respuesta.respondente_grado,
+          respuestas: respuesta.respuestas,
+          porcentaje_completitud: respuesta.porcentaje_completitud
+        })
+      }
+
+      // B) DESARROLLO_INTEGRAL: 20-30 estudiantes por escuela
+      const numEstudiantes = Math.floor(Math.random() * 11) + 20 // 20-30
+      console.log(`   Generando ${numEstudiantes} respuestas DESARROLLO_INTEGRAL para ${escuela.nombre}...`)
+      for (let i = 0; i < numEstudiantes; i++) {
+        const gradoAleatorio = grados[Math.floor(Math.random() * grados.length)]
+        const grupoAleatorio = grupos[Math.floor(Math.random() * grupos.length)]
+        const respuesta = generarRespuestaDesarrolloIntegral(diagnostico.id, gradoAleatorio, grupoAleatorio)
+        respuestasInstrumentos.push({
+          diagnostico_id: respuesta.diagnostico_id,
+          formulario_tipo: respuesta.formulario_tipo,
+          respondente_nombre: respuesta.respondente_nombre,
+          respondente_rol: respuesta.respondente_rol,
+          respondente_grado: respuesta.respondente_grado,
+          respondente_grupo: respuesta.respondente_grupo,
+          respondente_edad: respuesta.respondente_edad,
+          respondente_genero: respuesta.respondente_genero,
+          respuestas: respuesta.respuestas,
+          porcentaje_completitud: respuesta.porcentaje_completitud
+        })
+      }
+
+      // C) PRACTICAS_DOCENTES: 10-15 docentes por escuela
+      const numDocentes = Math.floor(Math.random() * 6) + 10 // 10-15
+      console.log(`   Generando ${numDocentes} respuestas PRACTICAS_DOCENTES para ${escuela.nombre}...`)
+      const nombresDocentes = [
+        'Prof. Alberto Ramírez', 'Profra. Carmen López', 'Prof. Daniel Ortiz',
+        'Profra. Elena Morales', 'Prof. Fernando Silva', 'Profra. Gloria Castro',
+        'Prof. Héctor Vega', 'Profra. Isabel Reyes', 'Prof. Jorge Mendoza',
+        'Profra. Karla Guzmán', 'Prof. Luis Herrera', 'Profra. Mónica Ramos',
+        'Prof. Nicolás Torres', 'Profra. Olga Díaz', 'Prof. Pablo Jiménez'
+      ]
+      for (let i = 0; i < numDocentes; i++) {
+        const nombreDocente = nombresDocentes[i % nombresDocentes.length]
+        const respuesta = generarRespuestaPracticasDocentes(diagnostico.id, nombreDocente)
+        respuestasInstrumentos.push({
+          diagnostico_id: respuesta.diagnostico_id,
+          formulario_tipo: respuesta.formulario_tipo,
+          respondente_nombre: respuesta.respondente_nombre,
+          respondente_rol: respuesta.respondente_rol,
+          respondente_asignatura: respuesta.respondente_asignatura,
+          respondente_anos_experiencia: respuesta.respondente_anos_experiencia,
+          respuestas: respuesta.respuestas,
+          porcentaje_completitud: respuesta.porcentaje_completitud
+        })
+      }
+
+      // D) FORMACION_DOCENTE: 8-12 docentes por escuela
+      const numDocentesFormacion = Math.floor(Math.random() * 5) + 8 // 8-12
+      console.log(`   Generando ${numDocentesFormacion} respuestas FORMACION_DOCENTE para ${escuela.nombre}...`)
+      for (let i = 0; i < numDocentesFormacion; i++) {
+        const nombreDocente = nombresDocentes[i % nombresDocentes.length]
+        const experiencia = Math.floor(Math.random() * 25) + 3
+        const respuesta = generarRespuestaFormacionDocente(diagnostico.id, nombreDocente, experiencia)
+        respuestasInstrumentos.push({
+          diagnostico_id: respuesta.diagnostico_id,
+          formulario_tipo: respuesta.formulario_tipo,
+          respondente_nombre: respuesta.respondente_nombre,
+          respondente_rol: respuesta.respondente_rol,
+          respondente_anos_experiencia: respuesta.respondente_anos_experiencia,
+          respuestas: respuesta.respuestas,
+          porcentaje_completitud: respuesta.porcentaje_completitud
+        })
+      }
+
+      // E) AMBIENTE_APRENDIZAJE: 2-3 observadores (directores/inspectores)
+      const numObservadores = Math.floor(Math.random() * 2) + 2 // 2-3
+      console.log(`   Generando ${numObservadores} respuestas AMBIENTE_APRENDIZAJE para ${escuela.nombre}...`)
+      for (let i = 0; i < numObservadores; i++) {
+        const respuesta = generarRespuestaAmbienteAprendizaje(diagnostico.id, i + 1)
+        respuestasInstrumentos.push({
+          diagnostico_id: respuesta.diagnostico_id,
+          formulario_tipo: respuesta.formulario_tipo,
+          respondente_nombre: respuesta.respondente_nombre,
+          respondente_rol: respuesta.respondente_rol,
+          respuestas: respuesta.respuestas,
+          porcentaje_completitud: respuesta.porcentaje_completitud
+        })
+      }
+    }
+
+    // Insertar todas las respuestas en la tabla respuestas_instrumentos
+    console.log(`\n📥 Insertando ${respuestasInstrumentos.length} respuestas en base de datos...`)
+
+    // Insertar en lotes de 100 para evitar límites de Supabase
+    const batchSize = 100
+    let totalInsertadas = 0
+
+    for (let i = 0; i < respuestasInstrumentos.length; i += batchSize) {
+      const batch = respuestasInstrumentos.slice(i, i + batchSize)
+      const { data: respuestasData, error: respuestasError } = await supabase
+        .from('respuestas_instrumentos')
+        .insert(batch)
+        .select()
+
+      if (respuestasError) {
+        console.error(`❌ Error insertando lote de respuestas:`, respuestasError)
+        throw respuestasError
+      }
+
+      totalInsertadas += respuestasData?.length || 0
+      console.log(`   ✓ Lote ${Math.floor(i / batchSize) + 1}: ${respuestasData?.length || 0} respuestas insertadas`)
+    }
+
+    console.log(`✅ ${totalInsertadas} respuestas de instrumentos generadas\n`)
+
+    // 5. RESUMEN FINAL
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('🎉 SEEDING COMPLETADO EXITOSAMENTE')
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-    console.log(`📚 Escuelas:      ${escuelasInsertadas?.length || 0}`)
-    console.log(`👥 Usuarios:      ${usuariosCreados.length}`)
-    console.log(`📊 Diagnósticos:  ${diagnosticosInsertados?.length || 0}`)
+    console.log(`📚 Escuelas:              ${escuelasInsertadas?.length || 0}`)
+    console.log(`👥 Usuarios:              ${usuariosCreados.length}`)
+    console.log(`📊 Diagnósticos:          ${diagnosticosInsertados?.length || 0}`)
+    console.log(`📝 Respuestas (v2):       ${totalInsertadas}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
     console.log('📝 CREDENCIALES DE ACCESO:')
