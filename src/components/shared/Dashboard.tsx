@@ -4,6 +4,7 @@ import { RolUsuario } from '../../types'
 import { GestionEscuelas } from './GestionEscuelas'
 import { GestionUsuarios } from './GestionUsuarios'
 import { GestionDiagnosticos } from '../diagnostico'
+import { DashboardAnalisis } from '../analisis'
 
 type VistaDashboard = 'inicio' | 'escuelas' | 'usuarios' | 'diagnostico' | 'analisis' | 'planeacion' | 'seguimiento'
 
@@ -55,6 +56,10 @@ export const Dashboard: React.FC = () => {
         <GestionDiagnosticos />
       </div>
     )
+  }
+
+  if (vistaActual === 'analisis') {
+    return <DashboardAnalisis onVolverDashboard={() => setVistaActual('inicio')} />
   }
 
   // Vista principal del dashboard
