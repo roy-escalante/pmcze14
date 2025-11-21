@@ -11,9 +11,12 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { X, User, Save } from 'lucide-react'
 import { useRespuestasInstrumentos } from '../../stores'
-import { FormularioTipo, RolRespondente, RespuestaInstrumento, DatosRespondente } from '../../types'
+import { FormularioTipo, RolRespondente, RespuestaInstrumento, DatosRespondente, TipoPregunta } from '../../types'
+import { FormularioInstrumento } from './FormularioInstrumento'
+import { getFormularioConfig, getTotalPreguntas } from '../../config/formularios'
 
 interface ModalAgregarRespuestaProps {
   diagnosticoId: string
@@ -93,11 +96,21 @@ export default function ModalAgregarRespuesta({
   const [anosExperiencia, setAnosExperiencia] = useState<number | ''>('')
   const [observaciones, setObservaciones] = useState('')
 
+  // Form para el formulario de preguntas
+  const formularioConfig = getFormularioConfig(formularioTipo)
+  const { register, formState: { errors: formErrors }, setValue, watch, getValues } = useForm<any>({
+    mode: 'onChange',
+    defaultValues: {
+      respuestas: {}
+    }
+  })
+
   // Cargar datos si es modo edición
   useEffect(() => {
     if (respuestaId) {
       const respuesta = respuestas.find(r => r.id === respuestaId)
       if (respuesta) {
+        // Cargar datos del respondente
         setNombre(respuesta.respondente.nombre)
         setRol(respuesta.respondente.rol)
         setGrado(respuesta.respondente.grado || '')
@@ -107,9 +120,16 @@ export default function ModalAgregarRespuesta({
         setAsignatura(respuesta.respondente.asignatura || '')
         setAnosExperiencia(respuesta.respondente.anosExperiencia || '')
         setObservaciones(respuesta.respondente.observaciones || '')
+
+        // Cargar respuestas del formulario
+        if (respuesta.respuestas) {
+          Object.entries(respuesta.respuestas).forEach(([preguntaId, respuestaData]: [string, any]) => {
+            setValue(`respuestas.${preguntaId}`, respuestaData.valor)
+          })
+        }
       }
     }
-  }, [respuestaId, respuestas])
+  }, [respuestaId, respuestas, setValue])
 
   const handleGuardarDatosRespondente = () => {
     // Validar campos requeridos
@@ -147,15 +167,37 @@ export default function ModalAgregarRespuesta({
         observaciones: observaciones || undefined
       }
 
-      // TODO: Capturar respuestas del formulario
-      const respuestasFormulario = {}
+      // Capturar respuestas del formulario
+      const valoresFormulario = getValues()
+      const respuestasFormulario: Record<string, any> = {}
+
+      // Convertir respuestas del form a formato de RespuestaInstrumento
+      formularioConfig.secciones.forEach(seccion => {
+        seccion.preguntas.forEach(pregunta => {
+          const valor = valoresFormulario.respuestas?.[pregunta.id]
+          if (valor !== undefined && valor !== null && valor !== '') {
+            respuestasFormulario[pregunta.id] = {
+              preguntaId: pregunta.id,
+              valor: valor,
+              tipo: pregunta.tipo as TipoPregunta
+            }
+          }
+        })
+      })
+
+      // Calcular porcentaje de completitud
+      const totalPreguntas = getTotalPreguntas(formularioConfig)
+      const preguntasRespondidas = Object.keys(respuestasFormulario).length
+      const porcentajeCompletitud = totalPreguntas > 0
+        ? Math.round((preguntasRespondidas / totalPreguntas) * 100)
+        : 0
 
       const nuevaRespuesta: Omit<RespuestaInstrumento, 'id'> = {
         diagnosticoId,
         formularioTipo,
         respondente: datosRespondente,
         respuestas: respuestasFormulario,
-        porcentajeCompletitud: 0 // Se calculará según las respuestas
+        porcentajeCompletitud
       }
 
       if (respuestaId) {
@@ -381,16 +423,41 @@ export default function ModalAgregarRespuesta({
             </div>
           ) : (
             /* PASO 2: Formulario de preguntas */
-            <div className="space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <p className="text-yellow-800 text-sm">
-                  📝 El formulario de preguntas se integrará en el siguiente paso del desarrollo.
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 text-sm font-medium mb-2">
+                  📝 Respondente: <span className="font-bold">{nombre}</span>
+                </p>
+                <p className="text-blue-700 text-xs">
+                  {rol} {grado && `- ${grado}`} {grupo && `Grupo ${grupo}`}
                 </p>
               </div>
 
-              <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                <p className="text-gray-600 mb-2">Formulario de {getTituloInstrumento(formularioTipo)}</p>
-                <p className="text-sm text-gray-500">(Componente en integración - MEGA-SPRINT 2)</p>
+              {/* Formulario de preguntas */}
+              <FormularioInstrumento
+                config={formularioConfig}
+                register={register}
+                errors={formErrors}
+                setValue={setValue}
+                watch={watch}
+              />
+
+              {/* Indicador de progreso */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
+                <p className="text-sm text-gray-600 mb-2">
+                  Progreso: {Object.keys(watch('respuestas') || {}).filter(k => watch('respuestas')?.[k]).length} de {getTotalPreguntas(formularioConfig)} preguntas respondidas
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(
+                        (Object.keys(watch('respuestas') || {}).filter(k => watch('respuestas')?.[k]).length / getTotalPreguntas(formularioConfig)) * 100,
+                        100
+                      )}%`
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
           )}
