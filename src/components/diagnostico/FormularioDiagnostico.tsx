@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, ChevronRight, Save, AlertCircle, CheckCircle, Clock, FileText, Users, Target, Award, Home, Heart, School, BookOpen, GraduationCap } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, AlertCircle, CheckCircle, Clock, FileText, Award, Home, Heart, School, BookOpen, GraduationCap } from 'lucide-react'
 import { DatosGeneralesDiagnosticoSchema, DimensionAprovechamientoSchema, FormularioRespuestasSchema, type DatosGeneralesDiagnosticoFormData, type DimensionAprovechamientoFormData, type FormularioRespuestasFormData } from '../../utils/validations'
 import { useDiagnostico, useEscuelas } from '../../stores'
 import { EstadoDiagnostico, FormularioTipo } from '../../types'
-import { SubirEvidenciasEconomico } from '../shared'
+// import { SubirEvidenciasEconomico } from '../shared' // LEGACY: Ya no se usa
 import EjerciciosIntegradores from './EjerciciosIntegradores'
 import FormularioInstrumento from './FormularioInstrumento'
 import { getFormularioConfig } from '../../config/formularios'
@@ -66,12 +66,13 @@ const pasos = [
   }
 ]
 
-const opcionesValoracion = [
-  { value: 4, label: 'Excelente', color: 'text-green-600', bgColor: 'bg-green-50 border-green-200' },
-  { value: 3, label: 'Bueno', color: 'text-blue-600', bgColor: 'bg-blue-50 border-blue-200' },
-  { value: 2, label: 'Regular', color: 'text-yellow-600', bgColor: 'bg-yellow-50 border-yellow-200' },
-  { value: 1, label: 'Deficiente', color: 'text-red-600', bgColor: 'bg-red-50 border-red-200' }
-]
+// LEGACY: Opciones de valoración anteriores (ya no se usan)
+// const opcionesValoracion = [
+//   { value: 4, label: 'Excelente', color: 'text-green-600', bgColor: 'bg-green-50 border-green-200' },
+//   { value: 3, label: 'Bueno', color: 'text-blue-600', bgColor: 'bg-blue-50 border-blue-200' },
+//   { value: 2, label: 'Regular', color: 'text-yellow-600', bgColor: 'bg-yellow-50 border-yellow-200' },
+//   { value: 1, label: 'Deficiente', color: 'text-red-600', bgColor: 'bg-red-50 border-red-200' }
+// ]
 
 // Componente para agregar participantes
 const ParticipantesInput = ({ value, onChange }: { value: string[], onChange: (value: string[]) => void }) => {
@@ -136,16 +137,17 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
   const [autoGuardado, setAutoGuardado] = useState<Date | null>(null)
   
   // Estado para evidencias por criterio
-  const [evidenciasPorCriterio, setEvidenciasPorCriterio] = useState<{
-    [criterio: string]: Array<{
-      id: string
-      nombre: string
-      tipo: string
-      tamaño: number
-      url: string
-      fechaSubida: Date
-    }>
-  }>({})
+  // LEGACY: Estado de evidencias anterior (ya no se usa)
+  // const [evidenciasPorCriterio, setEvidenciasPorCriterio] = useState<{
+  //   [criterio: string]: Array<{
+  //     id: string
+  //     nombre: string
+  //     tipo: string
+  //     tamaño: number
+  //     url: string
+  //     fechaSubida: Date
+  //   }>
+  // }>({})
   
   // Stores
   const { 
@@ -397,170 +399,53 @@ export default function FormularioDiagnostico({ diagnosticoId, onCancelar }: For
     }
   }
 
-  const guardarPracticasDocentes = async () => {
-    if (!diagnosticoActual) {
-      console.error('No hay diagnóstico activo')
-      return false
-    }
-    
-    const datos = formPracticasDocentes.getValues()
-    
-    try {
-      await actualizarDiagnostico(diagnosticoActual.id, {
-        dimensionPracticasDocentes: datos
-      })
-      console.log('Prácticas docentes guardadas exitosamente')
-      return true
-    } catch (error) {
-      console.error('Error al guardar prácticas docentes:', error)
-      alert('Error al guardar la información. Inténtelo de nuevo.')
-      return false
-    }
-  }
+  // LEGACY: Función de guardado anterior (ahora se usa FormularioInstrumento)
+  // const guardarPracticasDocentes = async () => {
+  //   if (!diagnosticoActual) {
+  //     console.error('No hay diagnóstico activo')
+  //     return false
+  //   }
+  //   
+  //   const datos = formPracticasDocentes.getValues()
+  //   
+  //   try {
+  //     await actualizarDiagnostico(diagnosticoActual.id, {
+  //       dimensionPracticasDocentes: datos
+  //     })
+  //     console.log('Prácticas docentes guardadas exitosamente')
+  //     return true
+  //   } catch (error) {
+  //     console.error('Error al guardar prácticas docentes:', error)
+  //     alert('Error al guardar la información. Inténtelo de nuevo.')
+  //     return false
+  //   }
+  // }
 
-  const guardarFormacionDocente = async () => {
-    if (!diagnosticoActual) {
-      console.error('No hay diagnóstico activo')
-      return false
-    }
-    
-    const datos = formFormacionDocente.getValues()
-    
-    try {
-      await actualizarDiagnostico(diagnosticoActual.id, {
-        dimensionFormacionDocente: datos
-      })
-      console.log('Formación docente guardada exitosamente')
-      return true
-    } catch (error) {
-      console.error('Error al guardar formación docente:', error)
-      alert('Error al guardar la información. Inténtelo de nuevo.')
-      return false
-    }
-  }
+  // LEGACY: Función de guardado anterior (ahora se usa FormularioInstrumento)
+  // const guardarFormacionDocente = async () => {
+  //   if (!diagnosticoActual) {
+  //     console.error('No hay diagnóstico activo')
+  //     return false
+  //   }
+  //   
+  //   const datos = formFormacionDocente.getValues()
+  //   
+  //   try {
+  //     await actualizarDiagnostico(diagnosticoActual.id, {
+  //       dimensionFormacionDocente: datos
+  //     })
+  //     console.log('Formación docente guardada exitosamente')
+  //     return true
+  //   } catch (error) {
+  //     console.error('Error al guardar formación docente:', error)
+  //     alert('Error al guardar la información. Inténtelo de nuevo.')
+  //     return false
+  //   }
+  // }
 
-  const renderCriterioEvaluacion = (
-    criterio: string,
-    nombre: string,
-    descripcion: string,
-    register: any,
-    errors: any,
-    watchForm: any,
-    setValue: any
-  ) => {
-    const criterioKey = `${criterio}` as const
-    const valoracionActual = watchForm(`${criterio}.valoracion`)
-    
-    return (
-      <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-        {/* Campos ocultos para los datos requeridos */}
-        <input type="hidden" {...register(`${criterio}.id`)} value={criterio.split('.').pop() || ''} />
-        <input type="hidden" {...register(`${criterio}.nombre`)} value={nombre} />
-        <input type="hidden" {...register(`${criterio}.descripcion`)} value={descripcion} />
-        
-        <div className="mb-4">
-          <h4 className="text-lg font-semibold text-gray-900 mb-2">{nombre}</h4>
-          <p className="text-sm text-gray-600">{descripcion}</p>
-        </div>
-        
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Valoración *
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {opcionesValoracion.map((opcion) => {
-                const isSelected = valoracionActual === opcion.value
-                return (
-                <div
-                  key={opcion.value}
-                  className={`relative flex items-center p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-all ${
-                    isSelected
-                      ? opcion.bgColor
-                      : 'bg-white border-gray-200 hover:bg-gray-50'
-                  }`}
-                  onClick={() => {
-                    // Usar setValue directamente para asegurar que funcione
-                    setValue(`${criterio}.valoracion`, opcion.value)
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name={`${criterio}_valoracion`}
-                    value={opcion.value}
-                    checked={isSelected}
-                    {...register(`${criterio}.valoracion`, { 
-                      valueAsNumber: true,
-                      required: 'La valoración es requerida'
-                    })}
-                    className="sr-only"
-                    readOnly
-                  />
-                  <div className={`w-4 h-4 border-2 rounded-full mr-3 transition-colors ${
-                    isSelected
-                      ? 'border-blue-500 bg-blue-500'
-                      : 'border-gray-300'
-                  }`}>
-                    {isSelected && (
-                      <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
-                    )}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className={`text-sm font-medium ${
-                      isSelected ? opcion.color : 'text-gray-700'
-                    }`}>
-                      {opcion.label}
-                    </span>
-                  </div>
-                </div>
-                )
-              })}
-            </div>
-            {errors[criterio]?.valoracion && (
-              <p className="mt-2 text-sm text-red-600 flex items-center">
-                <AlertCircle size={16} className="mr-1" />
-                {errors[criterio].valoracion.message}
-              </p>
-            )}
-          </div>
-
-          {/* Componente de Evidencias */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Evidencias
-            </label>
-            <SubirEvidenciasEconomico
-              evidencias={evidenciasPorCriterio[criterioKey] || []}
-              onAgregarEvidencia={(archivo: any) => {
-                setEvidenciasPorCriterio(prev => ({
-                  ...prev,
-                  [criterioKey]: [...(prev[criterioKey] || []), archivo]
-                }))
-              }}
-              onEliminarEvidencia={(archivoId: string) => {
-                setEvidenciasPorCriterio(prev => ({
-                  ...prev,
-                  [criterioKey]: prev[criterioKey]?.filter(archivo => archivo.id !== archivoId) || []
-                }))
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Observaciones
-            </label>
-            <textarea
-              {...register(`${criterio}.observaciones`)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-              placeholder="Observaciones adicionales sobre este criterio..."
-            />
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // LEGACY: Función de render anterior (ahora se usa FormularioInstrumento)
+  // Esta función ya no se usa pero se mantiene comentada por referencia
+  // const renderCriterioEvaluacion = (...) => { ... }
 
   const renderPaso1 = () => (
     <div className="space-y-6">
