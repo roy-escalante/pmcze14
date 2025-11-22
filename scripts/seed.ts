@@ -8,10 +8,17 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv'
+
+// Cargar variables de entorno
+config()
 
 // Configuración de Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co'
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key'
+
+console.log('🔧 URL de Supabase:', supabaseUrl)
+console.log('🔧 Key existe:', !!supabaseKey)
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
